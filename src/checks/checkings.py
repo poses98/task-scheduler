@@ -9,4 +9,3 @@ def checkDependencies(path, task_dependencies):
        if dependent_task in path and task not in path:
            return False
    return True
-
