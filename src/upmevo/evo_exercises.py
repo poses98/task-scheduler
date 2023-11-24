@@ -12,6 +12,7 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     :param task_dependencies: list of dependencies (expressed as binary tuples) between tasks
     :return: list with the start time of each task in the best solution found, or empty list if no solution was found
     """
+    print("Test Simple gen Alg")
     return []
 
 alphabet = [0,1]
@@ -116,4 +117,5 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     :param task_dependencies: list of dependencies (expressed as binary tuples) between tasks
     :return: list with the start time of each task in the best solution found, or empty list if no solution was found
     """
+    print("Test Advanced gen Alg")
     return []

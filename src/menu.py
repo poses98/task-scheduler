@@ -9,7 +9,7 @@ def menuAlgorithm():
         print("0. Exit")
         choice = int(input("Enter your choice: "))
         if choice < 0 or choice > 4:
-            print("Please enter a valid option 0-4.")
+            print("***Please enter a valid option 0-4.***")
     return choice
 
 def menuProblems():
@@ -22,5 +22,5 @@ def menuProblems():
         print("4. rcpsp30")
         choice = int(input("Enter your choice: "))
         if choice < 1 or choice > 3:
-            print("Please enter a valid option 0-4.")
+            print("***Please enter a valid option 0-4.***")
     return choice
