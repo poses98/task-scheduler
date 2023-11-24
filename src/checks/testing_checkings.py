@@ -23,7 +23,6 @@ def testDependenciesUnFullfilled():
        print("Test case 2: Dependencies not fulfilled for rcpsp06")
    return 0
 
-
 """
 RESOURCES
 ---------------------------------------------------------------------------------------------------
