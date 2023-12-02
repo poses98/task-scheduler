@@ -17,7 +17,7 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
 
 alphabet = [0,1]
 
-def knapsack_fitness(chromosome, **kwargs):
+def knapsack_fitness(chromosome, *args, **kwargs):
     fitness = 0
     weights=kwargs['weights'] # kwargs stores a dictionary with extra nominal arguments
     values=kwargs['values']
