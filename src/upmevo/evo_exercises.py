@@ -13,7 +13,34 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     :return: list with the start time of each task in the best solution found, or empty list if no solution was found
     """
     print("Test Simple gen Alg")
-    return []
+    # Parameter initialization
+    import numpy as np
+
+    pop_size = 100
+    elitism = 10
+    generations = 100
+    p_cross = 1.0
+    p_mut = 0.05
+
+    fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness = genetic_algorithm(alphabet, tasks, pop_size, generate_random_individual, knapsack_fitness, generation_stop, elitism, roulette_wheel_selection, one_point_crossover, p_cross, uniform_mutation,p_mut, task_duration=task_duration, task_resource=task_resource, task_dependencies=task_dependencies)
+
+    print("Best Individual:")
+    print(fittest_individual)
+    print("\nBest Individual's Fitness:" + str(fittest_fitness))
+
+    print("\nExercise 3:")
+
+    import matplotlib.pyplot as plt
+    x = np.linspace(0, generations + 1, generations + 1)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+    fig.tight_layout(pad=5.0)
+    ax1.plot(x, best_fitness)
+    ax2.plot(x, mean_fitness)
+    ax1.set_xlabel('Generation')
+    ax1.set_ylabel('Best Fitness')
+    ax2.set_xlabel('Generation')
+    ax2.set_ylabel('Mean Fitness')
+
 
 alphabet = [0,1]
 
@@ -53,6 +80,9 @@ def uniform_mutation(chromosome, p_mut, alphabet):
     child[mask] = np.array(alphabet)[indices]
     return child
 
+def generation_stop(generation, fitness, best_fitness, mean_fitness, *args, **kwargs):
+    max_gen=kwargs['max_gen']
+    return generation >= max_gen
 def genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, elitism, selection, crossover, p_cross, mutation, p_mut, *args, **kwargs):
     # Population initialization
     population = [generate_individual(alphabet, length, *args, **kwargs) for _ in range(0,100)]
@@ -104,6 +134,7 @@ def genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, 
     fittest_fitness = fitness_values[fittest_index]
 
     return fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness
+
 
 
 def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):

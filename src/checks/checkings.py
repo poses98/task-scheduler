@@ -11,7 +11,7 @@ def checkDependencies(chromosome, task_dependencies, task_duration):
        task_duration = task_duration[x]
        for dependency in task_dependencies:
            dependent_task, current_task = dependency
-           if (dependent_task == x): #No se si habría que hacer esta comprobación
+           if (current_task == x):
             dependent_task_start_time = chromosome[dependent_task]
             if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
                 return False
@@ -41,7 +41,6 @@ def checkResources(chromosome, task_duration, task_resource, resources):
         for span_task in range(len(chromosome)):
             if each_instant <= span_task+task_duration[span_task]:
                 used_resources = used_resources + task_resource[span_task]
-    if used_resources > resources:
-        return False
-    else:
-        return True
+        if used_resources > resources:
+            return False
+    return True
