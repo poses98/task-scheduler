@@ -1,6 +1,8 @@
 import math
-
 import numpy as np
+import checks.checkings
+
+
 def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     """
     Returns the best solution found by the basic genetic algorithm of exercise 3
@@ -13,16 +15,15 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     :return: list with the start time of each task in the best solution found, or empty list if no solution was found
     """
     print("Test Simple gen Alg")
-    # Parameter initialization
-    import numpy as np
-
+    np.random.seed(0)
     pop_size = 100
     elitism = 10
     generations = 100
-    p_cross = 1.0
-    p_mut = 0.05
+    p_cross = 0.9
+    p_mut = 0.1
+    max_gen = 100
 
-    fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness = genetic_algorithm(alphabet, tasks, pop_size, generate_random_individual, knapsack_fitness, generation_stop, elitism, roulette_wheel_selection, one_point_crossover, p_cross, uniform_mutation,p_mut, task_duration=task_duration, task_resource=task_resource, task_dependencies=task_dependencies)
+    fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness, chromosome = genetic_algorithm(alphabet, tasks, pop_size, generate_random_individual, individual_fitness(), generation_stop, elitism, roulette_wheel_selection, one_point_crossover, p_cross, uniform_mutation, p_mut, max_gen=max_gen, task_duration=task_duration, task_resource=task_resource, task_dependencies=task_dependencies)
 
     print("Best Individual:")
     print(fittest_individual)
@@ -41,21 +42,34 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     ax2.set_xlabel('Generation')
     ax2.set_ylabel('Mean Fitness')
 
+    return chromosome
 
-alphabet = [0,1]
+alphabet = [0, 100]
 
-def knapsack_fitness(chromosome, *args, **kwargs):
+
+def individual_fitness(chromosome, *args, **kwargs):
     fitness = 0
-    weights=kwargs['weights'] # kwargs stores a dictionary with extra nominal arguments
-    values=kwargs['values']
-    max_weight =kwargs['max_weight']
-    if np.dot(weights, chromosome) <= max_weight:
-        fitness = np.dot(values, chromosome)
+    tasks = kwargs['tasks']
+    if checks.checkings.checkDependencies(chromosome=chromosome, tasks=tasks, task_duration=kwargs['task_duration']):
+        if checks.checkings.checkResources(chromosome=chromosome, tasks=tasks, max_resources = kwargs['max_resources']):
+            fitness = calculate_makespan(chromosome, tasks)
     return fitness
+
+
+def calculate_makespan(chromosome, tasks):
+    latest_end = -1
+    for actual_task in range(len(chromosome)):
+        task_duration = tasks[actual_task]['task_duration']
+        end_time = chromosome[actual_task]+task_duration
+        if end_time > latest_end:
+            latest_end = end_time
+    return latest_end
+
 
 def generate_random_individual(alphabet, length, *args, **kwargs):
     indices = np.random.randint(0, len(alphabet), length)
     return np.array(alphabet)[indices]
+
 
 def roulette_wheel_selection(population, fitness, number_parents, *args, **kwargs):
     population_fitness = sum(fitness)
@@ -63,14 +77,16 @@ def roulette_wheel_selection(population, fitness, number_parents, *args, **kwarg
     indices = np.random.choice(range(len(fitness)), number_parents, p=chromosome_probabilities)
     return [population[i] for i in indices]
 
-def one_point_crossover(parent1, parent2, p_cross=0.9):
+
+def one_point_crossover(parent1, parent2, p_cross):
     if np.random.random() < p_cross:
-        point = np.random.randint(1,len(parent1)-1)
-        child1 = np.append(parent1[:point],parent2[point:])
-        child2 = np.append(parent2[:point],parent1[point:])
+        point = np.random.randint(1, len(parent1)-1)
+        child1 = np.append(parent1[:point], parent2[point:])
+        child2 = np.append(parent2[:point], parent1[point:])
         return child1, child2
     else:
         return parent1, parent2
+
 
 def uniform_mutation(chromosome, p_mut, alphabet):
     child = np.copy(chromosome)
@@ -80,10 +96,16 @@ def uniform_mutation(chromosome, p_mut, alphabet):
     child[mask] = np.array(alphabet)[indices]
     return child
 
-def generation_stop(generation, fitness, best_fitness, mean_fitness, *args, **kwargs):
+
+def generation_stop(generation, *args, **kwargs):
     max_gen=kwargs['max_gen']
     return generation >= max_gen
+
+
 def genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, elitism, selection, crossover, p_cross, mutation, p_mut, *args, **kwargs):
+    chromosome = [kwargs['tasks']]
+    for i in range(len(chromosome)):
+        chromosome[i] = -1
     # Population initialization
     population = [generate_individual(alphabet, length, *args, **kwargs) for _ in range(0,100)]
     offspring_size = pop_size - elitism
@@ -97,15 +119,14 @@ def genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, 
     mean_fitness.append(np.mean(fitness_values))
 
     # Main loop, checking stopping criteria
-    while not generation != 100:
-
+    while not generation_stop(generation, max_gen=kwargs['max_gen']):
         # Select elite parents
         if elitism > 0:
             indices = np.argpartition(fitness_values, -elitism)[-elitism:]
             elite = [population[i] for i in indices]
 
         # Select the parents and perform crossover and mutation
-        parents = selection(population, fitness_values, offspring_size if (offspring_size%2==0) else offspring_size+1, *args, **kwargs)
+        parents = selection(population, fitness_values, offspring_size if (offspring_size % 2 == 0) else offspring_size + 1, *args, **kwargs)
         offspring = []
         for k in range(math.ceil(offspring_size/2)):
             parent1 = parents[2*k]
@@ -133,7 +154,7 @@ def genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, 
     fittest_individual = population[fittest_index]
     fittest_fitness = fitness_values[fittest_index]
 
-    return fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness
+    return fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness, chromosome
 
 
 
