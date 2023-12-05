@@ -83,6 +83,7 @@ def exercise2(tasks=0, resources=0, task_duration=[], task_resource=[], task_dep
     def is_goal_state(state):
         return checks.checkDependencies(chromosome=state['chromosome'], task_dependencies=task_dependencies,
                                         task_duration=task_duration) and checks.checkResources(
+
             chromosome=state['chromosome'], task_duration=task_duration, task_resource=task_resource)
 
     # Initialize the priority queue
@@ -129,9 +130,3 @@ def heuristic_proposal1 (**kwargs):
         if task_duration[current_task] > max_duration:
             max_duration = task_duration[current_task]
     return max_duration
-def astar(chromosome, *args, **kwargs):
-    for i in range(len(chromosome)):
-        chromosome[i] = -1
-    for time in range(len(chromosome)):
-        task = selectDecision(chromosome)
-        chromosome[task] = time
