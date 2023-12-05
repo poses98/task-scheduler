@@ -1,5 +1,7 @@
 from src.checks.checkings import checkResources
 from src.checks.checkings import checkDependencies
+import heapq
+import checks
 
 
 def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
@@ -59,10 +61,51 @@ def exercise2(tasks=0, resources=0, task_duration=[], task_resource=[], task_dep
     :param task_dependencies: list of dependencies (expressed as binary tuples) between tasks
     :return: list with the start time of each task in the best solution found, or empty list if no solution was found
     """
-    print("Test A*")
 
+    # Define the heuristic function
+    def heuristic(state):
+        return heuristic_function(state['position'], chromosome=state['chromosome'],
+                                  tasks_dependencies=task_dependencies, task_duration=task_duration,
+                                  task_resource=task_resource)
+
+    # Define the successors function using the selectDecision function
+    def successors(state):
+        successors = []
+        selected_task = selectDecision(state['chromosome'])
+        if selected_task != -1:
+            new_state = state.copy()
+            new_state['chromosome'][selected_task] = state['time']  # Assign the current time to the selected task
+            new_state['time'] += task_duration[selected_task]  # Increment time by the task's duration
+            successors.append(new_state)
+        return successors
+
+    # Define the goal check function using the provided checks module
+    def is_goal_state(state):
+        return checks.checkDependencies(chromosome=state['chromosome'], task_dependencies=task_dependencies,
+                                        task_duration=task_duration) and checks.checkResources(
+            chromosome=state['chromosome'], task_duration=task_duration, task_resource=task_resource)
+
+    # Initialize the priority queue
+    frontier = []
+    # Initial state: (cost, {'time': 0, 'chromosome': [-1] * tasks})
+    initial_state = {'time': 0, 'chromosome': [-1] * tasks}
+    heapq.heappush(frontier, (heuristic(initial_state), initial_state))
+
+    while frontier:
+        current_cost, current_state = heapq.heappop(frontier)
+
+        # Check if current state is the goal state
+        if is_goal_state(current_state):
+            return current_state['chromosome']
+
+        # Expand the current state to its successors
+        for next_state in successors(current_state):
+            next_cost = current_cost + 1  # Assume a uniform cost of 1 for each step
+            heapq.heappush(frontier, (next_cost + heuristic(next_state), next_state))
+
+    # If no solution is found, return an empty list
     return []
-"""
+
 def selectDecision(chromosome):
     best_heuristic = 0
     selected_task = -1
@@ -92,4 +135,3 @@ def astar(chromosome, *args, **kwargs):
     for time in range(len(chromosome)):
         task = selectDecision(chromosome)
         chromosome[task] = time
-"""
