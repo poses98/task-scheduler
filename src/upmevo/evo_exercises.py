@@ -240,11 +240,11 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     print("Advanced Genetic Algorithm")
     np.random.seed(1234567890)
     # Parameter initialization
-    pop_size = 200
+    pop_size = 100
     elitism = 10
     generations = 100
     p_cross = 1.0
-    p_mut = 0.15
+    p_mut = 0.1
 
     fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness = adv_genetic_algorithm(
         alphabet=range(tasks),
@@ -302,8 +302,9 @@ def adv_genetic_algorithm(alphabet, length, pop_size, generate_individual, fitne
 
         # Select elite parents
         if elitism > 0:
-            indices = np.argpartition(fitness_values, -elitism)[-elitism:]
+            indices = np.argpartition(fitness_values, elitism)[:elitism]
             elite = [population[i] for i in indices]
+
 
         # Select the parents and perform crossover and mutation
         parents = selection(population, fitness_values,
@@ -347,11 +348,11 @@ def scheduling_fitness(schedule, *args, **kwargs):
     # Check for valid schedule based on dependencies
     if not checks.checkings.checkDependencies(chromosome=schedule, task_dependencies=task_dependencies,
                                               task_duration=task_duration):
-        return 1000
+        return 100
     # Check for valid schedule based on resource constraints
     if not checks.checkings.checkResources(chromosome=schedule, task_duration=task_duration,
                                            task_resource=task_resources, resources=max_resources):
-        return 1000
+        return 100
     # Calculate makespan as the fitness value
     makespan = calculate_makespan_adv(schedule, task_duration)
     return -makespan
