@@ -1,5 +1,6 @@
 import numpy as np
-from upmevo import genetic_algorithm
+from upmevo import *
+from upmproblems import rcpsp06 as p6
 
 
 def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
@@ -22,7 +23,7 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     p_mut = 0.1
     max_gen = 100
 
-    fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness, chromosome = genetic_algorithm(alphabet, tasks, pop_size, generate_random_individual, individual_fitness(), generation_stop, elitism, roulette_wheel_selection, one_point_crossover, p_cross, uniform_mutation, p_mut, max_gen=max_gen, task_duration=task_duration, task_resource=task_resource, task_dependencies=task_dependencies)
+    fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness = genetic_algorithm(alphabet, tasks, pop_size, generate_random_individual, individual_fitness, generation_stop, elitism, roulette_wheel_selection, one_point_crossover, p_cross, uniform_mutation, p_mut, max_gen=max_gen, task_duration=task_duration, task_resource=task_resource, task_dependencies=task_dependencies)
 
     print("Best Individual:")
     print(fittest_individual)
@@ -43,7 +44,7 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
 
     return fittest_individual
 
-
+print(exercise3(3, p6.get_tasks(), p6.get_resources(), task_duration= p6.get_task_duration(), task_resource=p6.get_task_resource(), task_dependencies=p6.get_task_dependencies()))
 
 def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     """

@@ -2,6 +2,8 @@ import checks.checkings as checks
 import numpy as np
 import math
 
+import upmproblems.rcpsp06
+
 
 def genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, elitism, selection, crossover, p_cross, mutation, p_mut, *args, **kwargs):
     chromosome = [kwargs['tasks']]
@@ -57,7 +59,13 @@ def genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, 
 
     return fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness, chromosome
 
-alphabet = [0, 100]
+def maximum_time (task_duration):
+    max_time = 0
+    for i in range(len(task_duration)):
+        max_time = max_time + task_duration[i]
+    return max_time
+
+alphabet = [0, maximum_time(upmproblems.rcpsp06.get_task_duration())]
 
 
 def individual_fitness(chromosome, *args, **kwargs):
