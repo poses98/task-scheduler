@@ -4,6 +4,7 @@ import checks.checkings
 import matplotlib.pyplot as plt
 
 
+
 def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     """
     Returns the best solution found by the basic genetic algorithm of exercise 3
@@ -120,7 +121,6 @@ def pmx_crossover(parent1, parent2, p_cross, *args, **kwargs):
     else:
         return parent1.copy(), parent2.copy()
 
-
 def uniform_mutation(chromosome, p_mut, alphabet, *args, **kwargs):
     child = np.copy(chromosome)
     random_values = np.random.random(len(chromosome))
@@ -128,6 +128,7 @@ def uniform_mutation(chromosome, p_mut, alphabet, *args, **kwargs):
     indices = np.random.randint(0, len(alphabet), size=np.count_nonzero(mask))
     child[mask] = np.array(alphabet)[indices]
     return child
+
 
 
 def swap_mutation(individual, p_mutate, *args, **kwargs):
@@ -239,7 +240,7 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     print("Advanced Genetic Algorithm")
     np.random.seed(1234567890)
     # Parameter initialization
-    pop_size = 150
+    pop_size = 200
     elitism = 10
     generations = 100
     p_cross = 1.0
@@ -344,10 +345,12 @@ def scheduling_fitness(schedule, *args, **kwargs):
     task_dependencies = kwargs['task_dependencies']
 
     # Check for valid schedule based on dependencies
-    if not check_dependencies(schedule, task_duration, task_dependencies):
+    if not checks.checkings.checkDependencies(chromosome=schedule, task_dependencies=task_dependencies,
+                                              task_duration=task_duration):
         return 1000
     # Check for valid schedule based on resource constraints
-    if not check_resources(schedule, task_duration, task_resource=task_resources, max_resources=max_resources):
+    if not checks.checkings.checkResources(chromosome=schedule, task_duration=task_duration,
+                                           task_resource=task_resources, resources=max_resources):
         return 1000
     # Calculate makespan as the fitness value
     makespan = calculate_makespan_adv(schedule, task_duration)
@@ -364,37 +367,3 @@ def calculate_makespan_adv(chromosome, tasks_duration):
     return latest_end
 
 
-def check_dependencies(schedule, task_duration, task_dependencies):
-    for schedule_index in range(len(schedule)):
-        task_start_time = schedule[schedule_index]
-        task_id = schedule_index + 1  # Tasks are 1-indexed
-        current_task_duration = task_duration[schedule_index]
-
-        # Check if dependencies are satisfied for the current task
-        for dependency in task_dependencies:
-            dependent_task, current_task = dependency
-            if current_task == task_id:
-                dependent_time_completed = schedule[dependent_task - 1] + task_duration[dependent_task - 1]
-                if dependent_time_completed > task_start_time:
-                    return False
-    return True
-
-
-
-def check_resources(schedule, task_duration, task_resource, max_resources, *args, **kwargs):
-    for schedule_index in range(len(schedule)):
-        task_index = schedule_index
-        current_task_resources = task_resource[task_index]
-        current_task_duration = task_duration[task_index]
-        task_start_time = schedule[schedule_index]
-
-        for conflictive_index in range(len(schedule)):
-            same_index = conflictive_index == schedule_index
-            executing_same_time = (task_start_time <= schedule[
-                conflictive_index] < task_start_time + current_task_duration) or schedule[
-                                      conflictive_index] <= task_start_time < current_task_duration + schedule[
-                                      conflictive_index]
-            if not same_index and executing_same_time:
-                if current_task_resources + task_resource[conflictive_index] > max_resources:
-                    return False
-    return True
