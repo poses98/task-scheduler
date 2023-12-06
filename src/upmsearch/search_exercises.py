@@ -63,13 +63,13 @@ def exercise2(tasks=0, resources=0, task_duration=[], task_resource=[], task_dep
     """
 
     # Define the heuristic function
-    def heuristic(state):
+def heuristic(state):
         return heuristic_function(state['position'], chromosome=state['chromosome'],
                                   tasks_dependencies=task_dependencies, task_duration=task_duration,
                                   task_resource=task_resource)
 
     # Define the successors function using the selectDecision function
-    def successors(state):
+def successors(state):
         successors = []
         selected_task = selectDecision(state['chromosome'])
         if selected_task != -1:
@@ -80,7 +80,7 @@ def exercise2(tasks=0, resources=0, task_duration=[], task_resource=[], task_dep
         return successors
 
     # Define the goal check function using the provided checks module
-    def is_goal_state(state):
+def is_goal_state(state):
         return checks.checkDependencies(chromosome=state['chromosome'], task_dependencies=task_dependencies,
                                         task_duration=task_duration) and checks.checkResources(
 
