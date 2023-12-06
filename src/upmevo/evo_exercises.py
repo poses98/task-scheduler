@@ -4,7 +4,6 @@ import checks.checkings
 import matplotlib.pyplot as plt
 
 
-
 def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     """
     Returns the best solution found by the basic genetic algorithm of exercise 3
@@ -121,6 +120,7 @@ def pmx_crossover(parent1, parent2, p_cross, *args, **kwargs):
     else:
         return parent1.copy(), parent2.copy()
 
+
 def uniform_mutation(chromosome, p_mut, alphabet, *args, **kwargs):
     child = np.copy(chromosome)
     random_values = np.random.random(len(chromosome))
@@ -128,7 +128,6 @@ def uniform_mutation(chromosome, p_mut, alphabet, *args, **kwargs):
     indices = np.random.randint(0, len(alphabet), size=np.count_nonzero(mask))
     child[mask] = np.array(alphabet)[indices]
     return child
-
 
 
 def swap_mutation(individual, p_mutate, *args, **kwargs):
@@ -240,9 +239,9 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     print("Advanced Genetic Algorithm")
     np.random.seed(1234567890)
     # Parameter initialization
-    pop_size = 100
+    pop_size = 200
     elitism = 10
-    generations = 100
+    generations = 300
     p_cross = 1.0
     p_mut = 0.1
 
@@ -305,7 +304,6 @@ def adv_genetic_algorithm(alphabet, length, pop_size, generate_individual, fitne
             indices = np.argpartition(fitness_values, elitism)[:elitism]
             elite = [population[i] for i in indices]
 
-
         # Select the parents and perform crossover and mutation
         parents = selection(population, fitness_values,
                             offspring_size if (offspring_size % 2 == 0) else offspring_size + 1, *args, **kwargs)
@@ -355,7 +353,7 @@ def scheduling_fitness(schedule, *args, **kwargs):
         return 100
     # Calculate makespan as the fitness value
     makespan = calculate_makespan_adv(schedule, task_duration)
-    return -makespan
+    return makespan
 
 
 def calculate_makespan_adv(chromosome, tasks_duration):
@@ -366,5 +364,3 @@ def calculate_makespan_adv(chromosome, tasks_duration):
         if end_time > latest_end:
             latest_end = end_time
     return latest_end
-
-

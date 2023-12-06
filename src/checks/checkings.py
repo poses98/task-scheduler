@@ -1,25 +1,24 @@
 def checkDependencies(chromosome, task_dependencies, task_duration):
-   """
-   Returns true if all dependencies are fulfilled, false otherwise.
-   Parameters:
-   - chromosome: list of the starting time of each task, initialized to -1
-   - task_dependencies: list of tuples representing task dependencies
-   - task_duration: list of the duration of each task.
-   """
-   for x in range(len(chromosome)):
-       task_start_time = chromosome[x]
-       task_duration = task_duration[x]
-       for dependency in task_dependencies:
-           dependent_task, current_task = dependency
-           if (current_task == x):
-            dependent_task_start_time = chromosome[dependent_task]
-            if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
-                return False
-            else:
-                if task_start_time != -1 & dependent_task_start_time == -1:
+    """
+    Returns true if all dependencies are fulfilled, false otherwise.
+    Parameters:
+    - chromosome: list of the starting time of each task, initialized to -1
+    - task_dependencies: list of tuples representing task dependencies
+    - task_duration: list of the duration of each task.
+    """
+    for x in range(len(chromosome)):
+        task_start_time = chromosome[x]
+        for dependency in task_dependencies:
+            dependent_task, current_task = dependency
+            if (current_task == x):
+                dependent_task_start_time = chromosome[dependent_task]
+                if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
                     return False
-       else:
-           return True
+                else:
+                    if task_start_time != -1 and dependent_task_start_time == -1:
+                        return False
+    return True
+
 
 def checkResources(chromosome, task_duration, task_resource, resources):
     """
@@ -39,7 +38,7 @@ def checkResources(chromosome, task_duration, task_resource, resources):
 
     for each_instant in range(latest_init):
         for span_task in range(len(chromosome)):
-            if each_instant <= span_task+task_duration[span_task]:
+            if each_instant <= span_task + task_duration[span_task]:
                 used_resources = used_resources + task_resource[span_task]
         if used_resources > resources:
             return False
