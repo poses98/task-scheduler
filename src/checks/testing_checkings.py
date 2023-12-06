@@ -12,15 +12,17 @@ DEPENDENCIES
 def testDependenciesFullfilled():
    partial_path_1 = [1, 2, 6, 6, 8, 8]
    task_duration = [3, 4, 2, 2, 1, 4]
-   task_dependencies = [(3, 1), (2, 3), (2, 4), (3, 5), (4, 6)]
+   task_dependencies = [(1,3), (2, 3), (2, 4), (3, 5), (4, 6)]
    result = checkDependencies(partial_path_1, task_duration, task_dependencies)
    resultDependencies(result)
    return 0
 
 # Test case 2: Partial path with unfulfilled dependencies for rcpsp06
 def testDependenciesUnFullfilled():
-    partial_path_2 = [1, 2, 4, 5]
-    result = checkDependencies(partial_path_2, rcpsp06_get_task_dependencies())
+    partial_path_2 = [1, 2, 4, 5, -1, -1]
+    task_duration = [3, 4, 2, 2, 1, 4]
+    task_dependencies = [(1, 3), (2, 3), (2, 4), (3, 5), (4, 6)]
+    result = checkDependencies(partial_path_2, task_duration, task_dependencies)
     resultDependencies(result)
     return 0
 
