@@ -237,11 +237,11 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     print("Advanced Genetic Algorithm")
     np.random.seed(1234567890)
     # Parameter initialization
-    pop_size = 150
+    pop_size = 100
     elitism = 10
-    generations = 2000
+    generations = 200
     p_cross = 1.0
-    p_mut = 0.25
+    p_mut = 0.15
 
     fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness = adv_genetic_algorithm(
         alphabet=range(sum(task_duration)),
@@ -251,7 +251,7 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
         fitness=scheduling_fitness,
         stopping_criteria=generation_stop,
         elitism=elitism,
-        selection=roulette_wheel_selection,
+        selection=tournament_selection,
         crossover=one_point_crossover,
         p_cross=p_cross,
         mutation=uniform_mutation,
@@ -261,6 +261,7 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
         resources=resources,
         task_dependencies=task_dependencies,
         max_gen=generations)
+
     # Display results
     print("Best Individual:")
     print(fittest_individual)
