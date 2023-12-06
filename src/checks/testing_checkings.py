@@ -14,16 +14,17 @@ DEPENDENCIES
 
 # Test case 1: Partial path with fulfilled dependencies for rcpsp06
 def testDependenciesFullfilled():
-    partial_path_1 = [1, 2, 3, 5]
-    result = checkDependencies(partial_path_1, rcpsp06_get_task_dependencies(), rcpsp06_get_task_duration())
+    partial_path_1 = [0, 3, 7, 9, 11, 12]
+    result = checkDependencies(partial_path_1, rcpsp06_get_task_duration(), rcpsp06_get_task_dependencies())
     resultDependencies(result)
     return 0
 
 
 # Test case 2: Partial path with unfulfilled dependencies for rcpsp06
 def testDependenciesUnFullfilled():
-    partial_path_2 = [1, 2, 4, 5]
-    result = checkDependencies(partial_path_2, rcpsp06_get_task_dependencies(), rcpsp06_get_task_duration())
+    partial_path_2 = [1, 2, 4, 5, 2, 4]
+    result = checkDependencies(partial_path_2, rcpsp06_get_task_duration(), rcpsp06_get_task_dependencies())
+
     resultDependencies(result)
     return 0
 
@@ -43,11 +44,10 @@ RESOURCES
 
 # Test case 1: Partial path with fulfilled resources for rcpsp06
 def testResourcesFulfilled():
-    partial_path_1 = [1, 2, 3]
+    partial_path_1 = [0, 4, 8, 10, 12, 13]
     task_duration = get_task_duration()
     task_resource = get_task_resource()
     resources = 4
-
     result = checkResources(partial_path_1, task_duration, task_resource, resources)
     resultResources(result)
     return 0

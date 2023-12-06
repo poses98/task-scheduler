@@ -1,4 +1,4 @@
-def checkDependencies(chromosome, task_dependencies, task_duration):
+def checkDependencies(chromosome, task_duration, task_dependencies):
     """
     Returns true if all dependencies are fulfilled, false otherwise.
     Parameters:
@@ -6,18 +6,21 @@ def checkDependencies(chromosome, task_dependencies, task_duration):
     - task_dependencies: list of tuples representing task dependencies
     - task_duration: list of the duration of each task.
     """
+    fulfilled = True
     for x in range(len(chromosome)):
         task_start_time = chromosome[x]
         for dependency in task_dependencies:
             dependent_task, current_task = dependency
-            if (current_task == x):
-                dependent_task_start_time = chromosome[dependent_task]
+            if current_task == x + 1:
+                dependent_task_start_time = chromosome[dependent_task - 1]
                 if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
-                    return False
+                    fulfilled = False
+                    return fulfilled
                 else:
-                    if task_start_time != -1 and dependent_task_start_time == -1:
-                        return False
-    return True
+                    if task_start_time != -1 & dependent_task_start_time == -1:
+                        fulfilled = False
+                        return fulfilled
+    return fulfilled
 
 
 def checkResources(chromosome, task_duration, task_resource, resources):
@@ -30,16 +33,23 @@ def checkResources(chromosome, task_duration, task_resource, resources):
     :param resources: total number of available resources (R)
     :return:
     """
-    used_resources = 0
-    for max_final in range(len(chromosome)):
-        latest_init = chromosome[0]
-        if chromosome[max_final] > latest_init:
-            latest_init = chromosome[max_final]
+    fulfilled = True
 
-    for each_instant in range(latest_init):
+    latest_init = chromosome[0]
+    for max_init in range(len(chromosome)):
+        if chromosome[max_init] > latest_init:
+            latest_init = chromosome[max_init]
+            index = max_init
+    latest_end = latest_init + task_duration[index]
+
+    for each_instant in range(latest_end):
+        used_resources = 0
         for span_task in range(len(chromosome)):
-            if each_instant <= span_task + task_duration[span_task]:
-                used_resources = used_resources + task_resource[span_task]
+            if chromosome[span_task] != -1:
+                if (each_instant > chromosome[span_task]) & (
+                        each_instant <= (chromosome[span_task] + task_duration[span_task])):
+                    used_resources += task_resource[span_task]
         if used_resources > resources:
-            return False
-    return True
+            fulfilled = False
+            return fulfilled
+    return fulfilled

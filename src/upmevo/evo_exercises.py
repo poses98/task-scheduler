@@ -84,8 +84,6 @@ def roulette_wheel_selection(population, fitness, number_parents, *args, **kwarg
 
 
 def one_point_crossover(parent1, parent2, p_cross, *args, **kwargs):
-    print(parent1)
-    print(parent2)
     if np.random.random() < p_cross:
         point = np.random.randint(1, len(parent1) - 1)
         child1 = np.append(parent1[:point], parent2[point:])
@@ -239,24 +237,24 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     print("Advanced Genetic Algorithm")
     np.random.seed(1234567890)
     # Parameter initialization
-    pop_size = 200
+    pop_size = 150
     elitism = 10
-    generations = 300
+    generations = 2000
     p_cross = 1.0
-    p_mut = 0.1
+    p_mut = 0.25
 
     fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness = adv_genetic_algorithm(
-        alphabet=range(tasks),
+        alphabet=range(sum(task_duration)),
         length=tasks,
         pop_size=pop_size,
         generate_individual=generate_random_individual,
         fitness=scheduling_fitness,
         stopping_criteria=generation_stop,
         elitism=elitism,
-        selection=tournament_selection,
-        crossover=pmx_crossover,
+        selection=roulette_wheel_selection,
+        crossover=one_point_crossover,
         p_cross=p_cross,
-        mutation=swap_mutation,
+        mutation=uniform_mutation,
         p_mut=p_mut,
         task_duration=task_duration,
         task_resources=task_resource,
@@ -342,16 +340,16 @@ def scheduling_fitness(schedule, *args, **kwargs):
     task_duration = kwargs['task_duration']
     task_resources = kwargs['task_resources']
     task_dependencies = kwargs['task_dependencies']
-
+    max_duration = sum(task_duration)
     # Check for valid schedule based on dependencies
-    if not checks.checkings.checkDependencies(chromosome=schedule, task_dependencies=task_dependencies,
-                                              task_duration=task_duration):
-        return 100
+    if not checks.checkings.checkDependencies(schedule, task_duration, task_dependencies):
+        return max_duration * 3
     # Check for valid schedule based on resource constraints
     if not checks.checkings.checkResources(chromosome=schedule, task_duration=task_duration,
-                                           task_resource=task_resources, resources=max_resources):
-        return 100
+                                           task_resource =task_resources, resources=max_resources):
+        return max_duration * 4
     # Calculate makespan as the fitness value
+
     makespan = calculate_makespan_adv(schedule, task_duration)
     return makespan
 
