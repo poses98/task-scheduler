@@ -53,13 +53,3 @@ def checkResources(chromosome, task_duration, task_resource, resources):
             fulfilled = False
             return fulfilled
     return fulfilled
-
-
-def test():
-    chromosome = [1, 4, 8, -1]
-    task_duration = [3, 4, 2, 3]
-    task_resources = [2, 2, 4, 4]
-    resources = 4
-
-    resul = checkResources(chromosome, task_duration, task_resources, resources)
-    print(resul)
