@@ -1,4 +1,4 @@
-def checkDependencies(chromosome, task_dependencies, task_duration):
+def checkDependencies(chromosome, task_duration, task_dependencies):
    """
    Returns true if all dependencies are fulfilled, false otherwise.
    Parameters:
@@ -6,20 +6,19 @@ def checkDependencies(chromosome, task_dependencies, task_duration):
    - task_dependencies: list of tuples representing task dependencies
    - task_duration: list of the duration of each task.
    """
+   fulfilled = True
    for x in range(len(chromosome)):
        task_start_time = chromosome[x]
-       task_duration = task_duration[x]
        for dependency in task_dependencies:
            dependent_task, current_task = dependency
            if (current_task == x):
             dependent_task_start_time = chromosome[dependent_task]
             if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
-                return False
+                fulfilled = False
             else:
                 if task_start_time != -1 & dependent_task_start_time == -1:
-                    return False
-       else:
-           return True
+                    fulfilled = False
+   return fulfilled
 
 def checkResources(chromosome, task_duration, task_resource, resources):
     """
