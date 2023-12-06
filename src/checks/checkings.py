@@ -22,6 +22,8 @@ def checkDependencies(chromosome, task_duration, task_dependencies):
                     return fulfilled
    return fulfilled
 
+
+
 def checkResources(chromosome, task_duration, task_resource, resources):
     """
     Returns true if the number of used resources for a partial path does
@@ -32,16 +34,32 @@ def checkResources(chromosome, task_duration, task_resource, resources):
     :param resources: total number of available resources (R)
     :return:
     """
-    used_resources = 0
-    for max_final in range(len(chromosome)):
-        latest_init = chromosome[0]
-        if chromosome[max_final] > latest_init:
-            latest_init = chromosome[max_final]
+    fulfilled = True
 
-    for each_instant in range(latest_init):
+    latest_init = chromosome[0]
+    for max_init in range(len(chromosome)):
+        if chromosome[max_init] > latest_init:
+            latest_init = chromosome[max_init]
+            index = max_init
+    latest_end = latest_init + task_duration[index]
+
+    for each_instant in range(latest_end):
+        used_resources = 0
         for span_task in range(len(chromosome)):
-            if each_instant <= span_task+task_duration[span_task]:
-                used_resources = used_resources + task_resource[span_task]
+            if chromosome[span_task] != -1:
+                if (each_instant > chromosome[span_task]) & (each_instant <= (chromosome[span_task] + task_duration[span_task])):
+                    used_resources += task_resource[span_task]
         if used_resources > resources:
-            return False
-    return True
+            fulfilled = False
+            return fulfilled
+    return fulfilled
+
+
+def test():
+    chromosome = [1, 4, 8, -1]
+    task_duration = [3, 4, 2, 3]
+    task_resources = [2, 2, 4, 4]
+    resources = 4
+
+    resul = checkResources(chromosome, task_duration, task_resources, resources)
+    print(resul)

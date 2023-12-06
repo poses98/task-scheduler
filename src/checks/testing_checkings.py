@@ -10,8 +10,10 @@ DEPENDENCIES
 """
 # Test case 1: Partial path with fulfilled dependencies for rcpsp06
 def testDependenciesFullfilled():
-   partial_path_1 = [1, 2, 3, 5]
-   result = checkDependencies(partial_path_1, rcpsp06_get_task_dependencies())
+   partial_path_1 = [1, 2, 6, 6, 8, 8]
+   task_duration = [3, 4, 2, 2, 1, 4]
+   task_dependencies = [(3, 1), (2, 3), (2, 4), (3, 5), (4, 6)]
+   result = checkDependencies(partial_path_1, task_duration, task_dependencies)
    resultDependencies(result)
    return 0
 
@@ -34,25 +36,24 @@ RESOURCES
 """
 # Test case 1: Partial path with fulfilled resources for rcpsp06
 def testResourcesFulfilled():
-    partial_path_1 = [1, 2, 3]
-    task_duration = get_task_duration()
-    task_resource = get_task_resource()
-    resources = 4
-
-    result = checkResources(partial_path_1, task_duration, task_resource, resources)
-    resultResources(result)
-    return 0
+   partial_path_1 = [1, 4, 8, -1, -1, -1]
+   task_duration = get_task_duration()
+   task_resource = get_task_resource()
+   resources = 4
+   resul = checkResources(partial_path_1, task_duration, task_resource, resources)
+   resultResources(resul)
+   return 0
 
 # Test case 1: Partial path with fulfilled resources for rcpsp06
 def testResourcesUnfulfilled():
-    partial_path_2 = [1, 2, 3, 4]  # Assume this path exceeds the available resources
-    task_duration = get_task_duration()
-    task_resource = get_task_resource()
-    resources = 2
+   partial_path_2 = [1, 2, 3, 4]  # Assume this path exceeds the available resources
+   task_duration = get_task_duration()
+   task_resource = get_task_resource()
+   resources = 2
 
-    result = checkResources(partial_path_2, task_duration, task_resource, resources)
-    resultResources(result)
-    return 0
+   result = checkResources(partial_path_2, task_duration, task_resource, resources)
+   resultResources(result)
+   return 0
 
 def resultResources(result):
     if result is True:
