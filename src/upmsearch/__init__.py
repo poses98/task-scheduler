@@ -46,7 +46,7 @@ def checkDependenciasBnB(cumpleDependencias, disponibilidad, task_duration, task
     return cumpleDependencias
 
 
-def checkResources(disponibilidad, cumpleDependencias, task_duration, task_resource, resources):
+def checkResources(disponibilidad, cumpleDependencias, task_duration, task_resource, resources, **kwargs):
     for instant in range(calculate_makespan(task_duration)):
         used_resources = 0
         for span_task in range(len(cumpleDependencias)):
@@ -54,10 +54,37 @@ def checkResources(disponibilidad, cumpleDependencias, task_duration, task_resou
                 if (instant >= disponibilidad[span_task]) & (instant < (disponibilidad[span_task] + task_duration[span_task])):
                     used_resources += task_resource[span_task]
                 if used_resources > resources:
-                    #AÑADIR COSTE PARA SELECCIONAR CUAL DE LAS TAREAS QUE ESTÁN USANDO EL RECURSO QUITAMOS
-                    disponibilidad[span_task] = -1
-                    used_resources -= task_resource[span_task]
+                    disponibilidad = mejorCoste(instant, disponibilidad, cumpleDependencias, task_duration, task_resource, resources, used_resources, **kwargs)
     return cumpleDependencias, disponibilidad
+
+def mejorCoste(instant, disponibilidad, cumpleDependencias, task_duration, task_resource, resources, used_resources, **kwargs):
+    "pos del mejor coste" # AÑADIR COSTE PARA SELECCIONAR CUAL DE LAS TAREAS QUE ESTÁN USANDO EL RECURSO QUITAMOS
+    peor_coste = 1000
+    pos = -1
+    while used_resources > resources:
+        for i in range(len(disponibilidad)):
+            if (instant >= disponibilidad[i]) & (instant < (disponibilidad[i] + task_duration[i])):
+                actual = calcularCoste(i, disponibilidad, cumpleDependencias, task_duration, task_resource, resources, task_dependencies=kwargs["task_dependencies"], tasks=kwargs["tasks"])
+                if actual < peor_coste:
+                    peor_coste = actual
+                    pos = i
+        disponibilidad[pos] = -1
+        used_resources -= task_resource[pos]
+    return disponibilidad
+
+def tareasDependiente(i, task_dependencies):
+    contador = 0
+    for x in range(len(task_dependencies)):
+            for dependency in task_dependencies:
+                (dependent_task, current_task) = dependency
+                if dependent_task == x + 1:
+                    contador += 1
+    return contador
+
+def calcularCoste(i, disponibilidad, cumpleDependencias, task_duration, task_resource, resources, **kwargs):
+    "recursos/tiempo + calcular cuántas tareas dependen de ella/ta"
+    tasks = kwargs["tasks"]
+    return task_resource[i]/ task_duration[i] + tareasDependiente(i, task_dependencies = kwargs["task_dependencies"])/tasks
 
 def modificarDisponibilidad(cumpleDependencias, disponibilidad, mejor):
     for i in range(len(cumpleDependencias)):
@@ -73,7 +100,7 @@ def branch_and_bound(disponibilidad, cumpleDependencias, **kwargs):
                                                   task_duration=kwargs["task_duration"],
                                                   task_dependencies=kwargs["task_dependencies"])
         disponibilidad = modificarDisponibilidad(cumpleDependencias, disponibilidad, i)
-        cumpleDependencias, disponibilidad = checkResources(disponibilidad, cumpleDependencias, task_duration=kwargs['task_duration'], task_resource=kwargs['task_resource'], resources=kwargs['resources'])
+        cumpleDependencias, disponibilidad = checkResources(disponibilidad, cumpleDependencias, task_duration=kwargs['task_duration'], task_resource=kwargs['task_resource'], resources=kwargs['resources'], task_dependencies=kwargs["task_dependencies"])
 
     "checkDep, el que no dp en true"
     "checkRec, false los que cumplan"

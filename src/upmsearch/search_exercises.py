@@ -99,6 +99,26 @@ def checkDependenciasBnB(cumpleDependencias, disponibilidad, task_duration, task
                                 cumpleDependencias[current_task] = False
     return cumpleDependencias
 
+def checkResourcesBnB(cumpleDependencias, disponibilidad, task_duration, task_dependencies):
+
+    "encontrar máximo dependiente"
+
+    for x in range(len(cumpleDependencias)): "a partir de pos máx dependiente"
+        if disponibilidad[x] == -1:
+            task_start_time = disponibilidad[x]
+            for dependency in task_dependencies:
+                (dependent_task, current_task) = dependency
+                if current_task == x + 1:
+                    dependent_task_start_time = disponibilidad[dependent_task - 1]
+                    if (task_start_time == -1) & (dependent_task_start_time != -1):
+                        cumpleDependencias[current_task - 1] = True
+                    else:
+                        if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
+                            cumpleDependencias[current_task - 1] = False
+                        else:
+                            if task_start_time != -1 & dependent_task_start_time == -1:
+                                cumpleDependencias[current_task] = False
+    return cumpleDependencias
 
 def modificarDisponibilidad(cumpleDependencias, disponibilidad, mejor):
     for i in range(len(cumpleDependencias)):
