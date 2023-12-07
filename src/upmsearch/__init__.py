@@ -83,7 +83,7 @@ def tareasDependiente(i, task_dependencies):
 def calcularCoste(i, task_duration, task_resource, **kwargs):
     "recursos/tiempo + calcular cuántas tareas dependen de ella/ta"
     tasks = kwargs["tasks"]
-    return task_resource[i]/ task_duration[i] + tareasDependiente(i, task_dependencies = kwargs["task_dependencies"])/tasks
+    return (task_resource[i]/ task_duration[i]) + tareasDependiente(i, task_dependencies = kwargs["task_dependencies"])
 
 def modificarDisponibilidad(cumpleDependencias, disponibilidad, mejor):
     for i in range(len(cumpleDependencias)):

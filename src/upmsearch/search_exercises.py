@@ -1,8 +1,4 @@
 from src.checks.checkings import checkResources
-from src.checks.checkings import checkDependencies
-import heapq
-import checks
-import itertools
 import src.upmproblems.rcpsp06 as rcpsp06
 
 "lista de caminos que salen"
@@ -118,7 +114,7 @@ def checkResourcesBnB(cumpleDependencias, disponibilidad, task_duration, task_de
                         else:
                             if task_start_time != -1 & dependent_task_start_time == -1:
                                 cumpleDependencias[current_task] = False
-    return cumpleDependencias
+    return 0
 
 def modificarDisponibilidad(cumpleDependencias, disponibilidad, mejor):
     for i in range(len(cumpleDependencias)):
