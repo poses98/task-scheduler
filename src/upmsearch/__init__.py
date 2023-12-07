@@ -1,10 +1,5 @@
 import src.upmproblems.rcpsp06 as rcpsp06
 
-"lista de caminos que salen"
-"definir función coste"
-"definir f makespan"
-"impr"
-
 def calculate_makespan(task_duration, *args, **kwargs):
     end_time = -1
     for actual_task in range(len(task_duration)):
@@ -21,29 +16,29 @@ def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dep
     cumpleDependencia = [True] * tasks
     branch_and_bound(disponibilidad, cumpleDependencia, tasks=tasks, resources=resources, task_duration=task_duration,
                      task_resource=task_resource, task_dependencies=task_dependencies)
-
-    "comprobar cuáles no disponen de ninguno"
-
     return disponibilidad
 
-
-def checkDependenciasBnB(cumpleDependencias, disponibilidad, task_duration, task_dependencies):
-    for x in range(len(cumpleDependencias)):
-        if disponibilidad[x] == -1:
-            task_start_time = disponibilidad[x]
-            for dependency in task_dependencies:
-                (dependent_task, current_task) = dependency
-                if current_task == x + 1:
-                    dependent_task_start_time = disponibilidad[dependent_task - 1]
-                    if (task_start_time == -1) & (dependent_task_start_time != -1):
-                        cumpleDependencias[current_task - 1] = True
-                    else:
-                        if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
-                            cumpleDependencias[current_task - 1] = False
-                        else:
-                            if task_start_time != -1 & dependent_task_start_time == -1:
-                                cumpleDependencias[current_task] = False
+def actualizarCumplido (cumpleDependencias,disponibilidad, task_duration, task_dependencies):
+    for i in range(len(cumpleDependencias)):
+        cumpleDependencias[i] = checkDependenciasBnB(disponibilidad, task_duration, task_dependencies, i)
     return cumpleDependencias
+
+
+def checkDependenciasBnB(disponibilidad, task_duration, task_dependencies, i):
+    cumple = True
+    for dependency in task_dependencies:
+        (dependent_task, current_task) = dependency
+        if current_task == i + 1:
+            dependent_task_start_time = disponibilidad[dependent_task - 1]
+            if (disponibilidad[i] == -1) & (dependent_task_start_time == -1):
+                cumple = False
+            else:
+                if (disponibilidad[i] != -1) & (disponibilidad[i] < (dependent_task_start_time + task_duration[dependent_task])):
+                    cumple = False
+                else:
+                    if (disponibilidad[i] != -1) & (dependent_task_start_time == -1):
+                        cumple = False
+    return cumple
 
 
 def checkResources(disponibilidad, cumpleDependencias, task_duration, task_resource, resources, **kwargs):
@@ -63,11 +58,12 @@ def mejorCoste(instant, disponibilidad, cumpleDependencias, task_duration, task_
     pos = -1
     while used_resources > resources:
         for i in range(len(disponibilidad)):
-            if (instant >= disponibilidad[i]) & (instant < (disponibilidad[i] + task_duration[i])):
-                actual = calcularCoste(i, disponibilidad, cumpleDependencias, task_duration, task_resource, resources, task_dependencies=kwargs["task_dependencies"], tasks=kwargs["tasks"])
-                if actual < peor_coste:
-                    peor_coste = actual
-                    pos = i
+            if disponibilidad[i] != -1:
+                if (instant >= disponibilidad[i]) & (instant < (disponibilidad[i] + task_duration[i])):
+                    actual = calcularCoste(i, task_duration, task_resource, **kwargs)
+                    if actual < peor_coste:
+                        peor_coste = actual
+                        pos = i
         disponibilidad[pos] = -1
         used_resources -= task_resource[pos]
     return disponibilidad
@@ -77,11 +73,11 @@ def tareasDependiente(i, task_dependencies):
     for x in range(len(task_dependencies)):
             for dependency in task_dependencies:
                 (dependent_task, current_task) = dependency
-                if dependent_task == x + 1:
+                if dependent_task == i + 1:
                     contador += 1
     return contador
 
-def calcularCoste(i, disponibilidad, cumpleDependencias, task_duration, task_resource, resources, **kwargs):
+def calcularCoste(i, task_duration, task_resource, **kwargs):
     "recursos/tiempo + calcular cuántas tareas dependen de ella/ta"
     tasks = kwargs["tasks"]
     return task_resource[i]/ task_duration[i] + tareasDependiente(i, task_dependencies = kwargs["task_dependencies"])/tasks
@@ -96,11 +92,11 @@ def modificarDisponibilidad(cumpleDependencias, disponibilidad, mejor):
 
 def branch_and_bound(disponibilidad, cumpleDependencias, **kwargs):
     for i in range(calculate_makespan(task_duration=kwargs['task_duration'])):
-        cumpleDependencias = checkDependenciasBnB(cumpleDependencias, disponibilidad,
+        cumpleDependencias = actualizarCumplido(cumpleDependencias, disponibilidad,
                                                   task_duration=kwargs["task_duration"],
                                                   task_dependencies=kwargs["task_dependencies"])
         disponibilidad = modificarDisponibilidad(cumpleDependencias, disponibilidad, i)
-        cumpleDependencias, disponibilidad = checkResources(disponibilidad, cumpleDependencias, task_duration=kwargs['task_duration'], task_resource=kwargs['task_resource'], resources=kwargs['resources'], task_dependencies=kwargs["task_dependencies"])
+        cumpleDependencias, disponibilidad = checkResources(disponibilidad, cumpleDependencias, task_duration=kwargs['task_duration'], task_resource=kwargs['task_resource'], resources=kwargs['resources'], task_dependencies=kwargs["task_dependencies"], tasks=kwargs['tasks'])
 
     "checkDep, el que no dp en true"
     "checkRec, false los que cumplan"
