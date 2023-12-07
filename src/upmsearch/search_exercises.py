@@ -2,131 +2,114 @@ from src.checks.checkings import checkResources
 from src.checks.checkings import checkDependencies
 import heapq
 import checks
+import itertools
+import src.upmproblems.rcpsp06 as rcpsp06
+"lista de caminos que salen"
+"definir función coste"
+"definir f makespan"
+"impr"
 
+def checkDependencies(chromosome, task_duration, task_dependencies):
+   """
+   Returns true if all dependencies are fulfilled, false otherwise.
+   Parameters:
+   - chromosome: list of the starting time of each task, initialized to -1
+   - task_dependencies: list of tuples representing task dependencies
+   - task_duration: list of the duration of each task.
+   """
+   fulfilled = True
+   for x in range(len(chromosome)):
+       task_start_time = chromosome[x]
+       for dependency in task_dependencies:
+           (dependent_task, current_task) = dependency
+           if (current_task == x+1):
+            dependent_task_start_time = chromosome[dependent_task-1]
+            if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
+                fulfilled = False
 
+                return fulfilled
+            else:
+                if task_start_time != -1 & dependent_task_start_time == -1:
+                    fulfilled = False
+                    return fulfilled
+   return fulfilled
+
+def calculate_makespan(task_duration, *args, **kwargs):
+    end_time = -1
+    for actual_task in range(len(task_duration)):
+        end_time += task_duration[actual_task]
+    return end_time
+
+def checkResources(chromosome, task_duration, task_resource, resources):
+    """
+    Returns true if the number of used resources for a partial path does
+    not exceed R. False otherwise
+    :param chromosome: list of the starting time of each task, initialized to -1
+    :param task_duration: list of task durations
+    :param task_resource: list of task resource requirements
+    :param resources: total number of available resources (R)
+    :return:
+    """
+    fulfilled = True
+    for each_instant in range(calculate_makespan(chromosome, task_duration)):
+        used_resources = 0
+        for span_task in range(len(chromosome)):
+            if chromosome[span_task] != -1:
+                if (each_instant > chromosome[span_task]) & (each_instant <= (chromosome[span_task] + task_duration[span_task])):
+                    used_resources += task_resource[span_task]
+        if used_resources > resources:
+            fulfilled = False
+            return fulfilled
+    return fulfilled
+
+"array disponibilidad"
 def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
-    print("Initial State:")
-    initial_chromosome = [0] * tasks
-    initial_cost = 0
-    print(f"Chromosome: {initial_chromosome}, Cost: {initial_cost}")
-
-    # Initialize priority queue for state exploration
-    priority_queue = []
-
-    def push(cost, chromosome):
-        nonlocal priority_queue
-        priority_queue.append((cost, chromosome))
-        priority_queue.sort(reverse=True)  # Sort in reverse order to get the smallest cost first
-
-    def pop():
-        nonlocal priority_queue
-        return priority_queue.pop()
-
-    push(initial_cost, initial_chromosome)
-
-    while priority_queue:
-        current_cost, current_chromosome = pop()
-
-        # Check if the current partial schedule is a valid solution
-        if len(set(current_chromosome)) == tasks:
-            print("\nFinal State (Solution Found):")
-            print(f"Chromosome: {current_chromosome}, Cost: {current_cost}")
-            return current_chromosome
-
-        # Explore child states (partial schedules)
-        for task_index in range(tasks):
-            if current_chromosome[task_index] == 0:
-                # Task not scheduled, try scheduling it at the earliest possible time
-                new_chromosome = current_chromosome.copy()
-                new_chromosome[task_index] = max(current_chromosome) + 1
-
-                # Check resource and dependency constraints
-                if (checkResources(new_chromosome, task_duration, task_resource, resources) and
-                        checkDependencies(new_chromosome, task_dependencies, task_duration)):
-                    new_cost = max(new_chromosome) + task_duration[task_index]
-                    push(new_cost, new_chromosome)
-
-    # If no solution found
-    print("\nNo Solution Found")
-    return []
+  "inicializando"
+  disponibilidad = [-1] * tasks
+  cumpleDependencia = [True] * tasks
+  brand_and_bound(disponibilidad, cumpleDependencia, tasks=tasks, resources=resources, task_duration=task_duration,
+                  task_resource=task_resource, task_dependencies=task_dependencies)
 
 
-def exercise2(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
-    """
-    Returns the best solution found by the A* algorithm of exercise 2
-    :param tasks: number of tasks in the task planning problem with resources
-    :param resources: number of resources in the task planning problem with resources
-    :param task_duration: list of durations of the tasks
-    :param task_resource: list of resources required by each task
-    :param task_dependencies: list of dependencies (expressed as binary tuples) between tasks
-    :return: list with the start time of each task in the best solution found, or empty list if no solution was found
-    """
+  "comprobar cuáles no disponen de ninguno"
 
-    # Define the heuristic function
-def heuristic(state):
-        return heuristic_function(state['position'], chromosome=state['chromosome'],
-                                  tasks_dependencies=task_dependencies, task_duration=task_duration,
-                                  task_resource=task_resource)
+  return cumpleDependencia
 
-    # Define the successors function using the selectDecision function
-def successors(state):
-        successors = []
-        selected_task = selectDecision(state['chromosome'])
-        if selected_task != -1:
-            new_state = state.copy()
-            new_state['chromosome'][selected_task] = state['time']  # Assign the current time to the selected task
-            new_state['time'] += task_duration[selected_task]  # Increment time by the task's duration
-            successors.append(new_state)
-        return successors
+def checkDependenciasBnB(cumpleDependencias, disponibilidad, task_duration, task_dependencies):
+   fulfilled = True
+   for x in range(calculate_makespan(task_duration)):
+       task_start_time = disponibilidad[x]
+       for dependency in task_dependencies:
+           (dependent_task, current_task) = dependency
+           if (current_task == x+1):
+            dependent_task_start_time = disponibilidad[dependent_task-1]
+            if task_start_time < (dependent_task_start_time + task_duration[dependent_task]):
+                cumpleDependencias[current_task] = False
 
-    # Define the goal check function using the provided checks module
-def is_goal_state(state):
-        return checks.checkDependencies(chromosome=state['chromosome'], task_dependencies=task_dependencies,
-                                        task_duration=task_duration) and checks.checkResources(
+            else:
+                if task_start_time != -1 & dependent_task_start_time == -1:
+                    cumpleDependencias[current_task] = False
+   return cumpleDependencias
 
-            chromosome=state['chromosome'], task_duration=task_duration, task_resource=task_resource)
 
-    # Initialize the priority queue
-    frontier = []
-    # Initial state: (cost, {'time': 0, 'chromosome': [-1] * tasks})
-    initial_state = {'time': 0, 'chromosome': [-1] * tasks}
-    heapq.heappush(frontier, (heuristic(initial_state), initial_state))
+def modificarDisponibilidad(cumpleDependencias, disponibilidad, mejor):
+    return 0
 
-    while frontier:
-        current_cost, current_state = heapq.heappop(frontier)
+def brand_and_bound(disponibilidad, cumpleDependencias, **kwargs):
+    for i in range(calculate_makespan(task_duration=kwargs["task_duration"])):
 
-        # Check if current state is the goal state
-        if is_goal_state(current_state):
-            return current_state['chromosome']
+            cumpleDependencias = checkDependenciasBnB(cumpleDependencias, disponibilidad, task_duration=kwargs["task_duration"], task_dependencies=kwargs["task_dependencies"])
+            print(cumpleDependencias)
+            "checkDep, el que no dp en true"
+            "checkRec, false los que cumplan"
+            "si en el array de T/F, seleccionar el de mejor coste"
+            "mejor = mejorCoste()"
+            "modifDisponibilidad"
 
-        # Expand the current state to its successors
-        for next_state in successors(current_state):
-            next_cost = current_cost + 1  # Assume a uniform cost of 1 for each step
-            heapq.heappush(frontier, (next_cost + heuristic(next_state), next_state))
 
-    # If no solution is found, return an empty list
-    return []
+"mirar solo los que no son -1"
 
-def selectDecision(chromosome):
-    best_heuristic = 0
-    selected_task = -1
-    for i in range(len(chromosome)):
-        actual_heuristic = heuristic_function(i, chromosome=chromosome)
-        if actual_heuristic > best_heuristic:
-            selected_task = chromosome[i]
-    return selected_task
 
-def heuristic_function (position, **kwargs):
-    heuristic = 0
-    if checks.checkDependencies(kwargs= ['chromosome'], task_dependencies=kwargs['tasks_dependencies'], task_duration=kwargs['task_duration']):
-        if checks.checkResources(kwargs= ['chromosome'], task_duration=kwargs['task_duration'], task_resource=kwargs['task_resource']):
-            heuristic = heuristic_proposal1(kwargs=['chromosome'])
-    return heuristic
 
-def heuristic_proposal1 (**kwargs):
-    max_duration = -1
-    task_duration = kwargs['task_duration']
-    for current_task in range(len(kwargs= ['chromosome'])):
-        if task_duration[current_task] > max_duration:
-            max_duration = task_duration[current_task]
-    return max_duration
+"poner en qué momento se inicializa "
+print(exercise1(rcpsp06.get_tasks(), rcpsp06.get_resources(), rcpsp06.task_duration, rcpsp06.get_task_resource(), rcpsp06.get_task_dependencies()))

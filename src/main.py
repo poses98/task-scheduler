@@ -39,19 +39,6 @@ from src.upmevo.evo_exercises import exercise4 as advancedGenetic
 from src.upmsearch.search_exercises import exercise1 as branchAndBound
 from src.upmsearch.search_exercises import exercise2 as aStar
 
-# 2. VERIFICATION OF CHECKDEPENDENCIES AND CHECKRESOURCES
-def checkingAlg():
-    print("Testing that the method checkDependencies works correctly, at least for rcpsp06 (for example)")
-    testDependenciesFullfilled()
-    testDependenciesUnFullfilled()
-
-    print()
-
-    print("Testing that the method checkResources works correctly, at least for rcpsp06 (for example)")
-    testResourcesFulfilled()
-    testResourcesUnfulfilled()
-    print("-----------------------------------------------------------------------------------------------")
-
 # 3. TASKSCHEDULER (CHOOSING
 def taskScheduler():
     choiceAlg = -1
@@ -91,7 +78,8 @@ def taskScheduler():
             # Then, the algorithm starts (depending on the previous choice made), with its data already prepared
             match choiceAlg:
                 case 1:
-                    branchAndBound(tasks, resources, task_duration, task_resource, task_dependencies)
+                    result = branchAndBound(tasks, resources, task_duration, task_resource, task_dependencies)
+                    print(print("Best Solution:", result))
                 case 2:
                     aStar(tasks, resources, task_duration, task_resource, task_dependencies)
                 case 3:
@@ -103,5 +91,4 @@ def taskScheduler():
     print("Execution completed. Thank you")
 
 print('\nTask Scheduler')
-checkingAlg()
 taskScheduler()

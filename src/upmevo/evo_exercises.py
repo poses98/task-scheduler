@@ -14,6 +14,7 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     :param task_dependencies: list of dependencies (expressed as binary tuples) between tasks
     :return: list with the start time of each task in the best solution found, or empty list if no solution was found
     """
+    """
     print("Test Simple gen Alg")
     pop_size = 100
     max_gen = 100
@@ -46,7 +47,7 @@ def exercise3(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
 exercise3(363, tasks=p6.get_tasks(), resources=p6.get_resources(), task_duration=p6.get_task_duration(),
           task_resource=p6.get_task_resource(), task_dependencies=p6.get_task_dependencies())
 
-
+"""
 def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     """
     Returns the best solution found by the advanced genetic algorithm of exercise 4
