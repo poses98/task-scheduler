@@ -287,11 +287,11 @@ def calculateCost(i, task_duration, task_resource, **kwargs):
     return (task_resource[i] / task_duration[i]) + dependent_tasks(i, task_dependencies=kwargs["task_dependencies"])
 
 
-def updateAvaliability(fulfillsDependencies, avaliability, mejor):
+def updateAvaliability(fulfillsDependencies, avaliability, best):
     for i in range(len(fulfillsDependencies)):
         if avaliability[i] == -1 and fulfillsDependencies[i]:
             # Schedule the task at the earliest possible time
-            avaliability[i] = mejor
+            avaliability[i] = best
     return avaliability
 
 
