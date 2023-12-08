@@ -95,7 +95,7 @@ def taskScheduler():
                 case 2:
                     aStar(tasks, resources, task_duration, task_resource, task_dependencies)
                 case 3:
-                    seed = 1  # HERE, CORREGIR !!
+                    seed = 1
                     simpleGenetic(seed, tasks, resources, task_duration, task_resource, task_dependencies)
                 case 4:
                     seed = 0  # HERE, CORREGIR !!

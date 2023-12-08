@@ -121,7 +121,7 @@ def genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness,
 
     return fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness
 
-def exercise3(seed, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
+def exercise3(seed, tasks, resources, task_duration=[], task_resource=[], task_dependencies=[]):
     """
     Returns the best solution found by the basic genetic algorithm of exercise 3
     :param seed: used to initialize the random number generator
