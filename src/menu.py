@@ -22,6 +22,6 @@ def menuProblems():
         print("3. rcpsp10")
         print("4. rcpsp30")
         choice = int(input("Enter your choice: "))
-        if choice < 1 or choice > 3:
+        if choice < 1 or choice > 5:
             print("***Please enter a valid option 0-4.***")
     return choice
