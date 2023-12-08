@@ -1,3 +1,4 @@
+
 def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     """
     Main function for exercise 1.
@@ -16,9 +17,10 @@ def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dep
     branch_and_bound(availability, achievesDependencies, tasks=tasks, resources=resources, task_duration=task_duration,
                      task_resource=task_resource, task_dependencies=task_dependencies)
     return availability
+
 "-----------------------------------------------------------------------------------------------------------------------------------"
 "Additional methods for exercise 1"
-def calculate_makespan(task_duration, *args, **kwargs):
+def calculate_makespanBnB(task_duration, *args, **kwargs):
     """
     Calculates the makespan of a schedule, used during execution.
     Parameters:
@@ -32,7 +34,7 @@ def calculate_makespan(task_duration, *args, **kwargs):
         end_time += task_duration[actual_task]
     return end_time
 
-def updateAchieved(achievesDependencies, availability, i, task_duration, task_dependencies):
+def updateAchievedBnB(achievesDependencies, availability, i, task_duration, task_dependencies):
     """
     Updates the list of achieved dependencies for each task.
     Parameters:
@@ -60,7 +62,7 @@ def fulfillsDependenciesBnB(i, availability, task_duration, task_dependencies, t
     - task_dependencies: list of task dependency tuples.
     - task: index of the current task.
     Returns:
-    - bool: True if all dependencies are fulfilled, False otherwise.
+    - boolean: True if all dependencies are fulfilled, False otherwise.
     """
 
     fulfills = True
@@ -76,7 +78,7 @@ def fulfillsDependenciesBnB(i, availability, task_duration, task_dependencies, t
     return fulfills
 
 
-def checkResources(availability, achievesDependencies, task_duration, task_resource, resources, **kwargs):
+def checkResourcesBnB(availability, achievesDependencies, task_duration, task_resource, resources, **kwargs):
     """
     Checks resource availability for each time instant in the schedule.
     Parameters:
@@ -89,7 +91,7 @@ def checkResources(availability, achievesDependencies, task_duration, task_resou
     - list: Updated availability schedule.
     """
 
-    for instant in range(calculate_makespan(task_duration)):
+    for instant in range(calculate_makespanBnB(task_duration)):
         used_resources = 0
         for span_task in range(len(achievesDependencies)):
             if availability[span_task] != -1:
@@ -97,26 +99,26 @@ def checkResources(availability, achievesDependencies, task_duration, task_resou
                         instant < (availability[span_task] + task_duration[span_task])):
                     used_resources += task_resource[span_task]
                 if used_resources > resources:
-                    availability = bestCost(instant, availability, achievesDependencies, task_duration, task_resource,
-                                            resources, used_resources, **kwargs)
+                    availability = bestCostBnB(instant, availability, achievesDependencies, task_duration, task_resource,
+                                               resources, used_resources, **kwargs)
     return availability
 
 
-def bestCost(instant, availability, achievesDependencies, task_duration, task_resource, resources, used_resources,
-             **kwargs):
+def bestCostBnB(instant, availability, achievesDependencies, task_duration, task_resource, resources, used_resources,
+                **kwargs):
     """
-    Finds the task with the best cost and removes it from the schedule if resource usage exceeds the limit.
-    Parameters:
-    - instant: current time instant.
-    - availability: list of task start times.
-    - achievesDependencies: list of achieved dependencies for each task.
-    - task_duration: list of task durations.
-    - task_resource: list of resource requirements for each task.
-    - resources: total number of resources.
-    - used_resources: current total resources in use.
-    Returns:
-    - list: Updated availability schedule.
-    """
+        Finds the task with the best cost and removes it from the schedule if resource usage exceeds the limit.
+        Parameters:
+        - instant: current time instant.
+        - availability: list of task start times.
+        - achievesDependencies: list of achieved dependencies for each task.
+        - task_duration: list of task durations.
+        - task_resource: list of resource requirements for each task.
+        - resources: total number of resources.
+        - used_resources: current total resources in use.
+        Returns:
+        - list: Updated availability schedule.
+        """
 
     worst_cost = 1000
     pos = -1
@@ -124,7 +126,7 @@ def bestCost(instant, availability, achievesDependencies, task_duration, task_re
         for i in range(len(availability)):
             if availability[i] != -1:
                 if (instant >= availability[i]) & (instant < (availability[i] + task_duration[i])):
-                    current = calculateCost(i, task_duration, task_resource, **kwargs)
+                    current = calculateCostBnB(i, task_duration, task_resource, **kwargs)
                     if current < worst_cost:
                         worst_cost = current
                         pos = i
@@ -133,7 +135,7 @@ def bestCost(instant, availability, achievesDependencies, task_duration, task_re
     return availability
 
 
-def dependentTasks(i, task_dependencies):
+def dependentTasksBnB(i, task_dependencies):
     """
     Counts the number of tasks dependent on a given task.
     Parameters:
@@ -151,8 +153,7 @@ def dependentTasks(i, task_dependencies):
                 counter += 1
     return counter
 
-
-def calculateCost(i, task_duration, task_resource, **kwargs):
+def calculateCostBnB(i, task_duration, task_resource, **kwargs):
     """
     Calculates the cost of a task based on resource usage and number of dependent tasks.
     Parameters:
@@ -165,10 +166,10 @@ def calculateCost(i, task_duration, task_resource, **kwargs):
     """
 
     tasks = kwargs["tasks"]
-    return (task_resource[i] / task_duration[i]) + dependentTasks(i, task_dependencies=kwargs["task_dependencies"])
+    return (task_resource[i] / task_duration[i]) + dependentTasksBnB(i, task_dependencies=kwargs["task_dependencies"])
 
 
-def modifyAvailability(achievesDependencies, availability, best):
+def modifyAvailabilityBnB(achievesDependencies, availability, best):
     """
     Modifies the availability schedule based on achieved dependencies.
     Parameters:
@@ -195,14 +196,14 @@ def branch_and_bound(availability, achievesDependencies, **kwargs):
     - kwargs: additional parameters, including task durations, resources, etc.
     """
 
-    for i in range(calculate_makespan(task_duration=kwargs['task_duration'])):
-        achievesDependencies = updateAchieved(achievesDependencies, availability, i,
-                                              task_duration=kwargs["task_duration"],
-                                              task_dependencies=kwargs["task_dependencies"])
-        availability = modifyAvailability(achievesDependencies, availability, i)
-        availability = checkResources(availability, achievesDependencies, task_duration=kwargs['task_duration'],
-                                      task_resource=kwargs['task_resource'], resources=kwargs['resources'],
-                                      task_dependencies=kwargs["task_dependencies"], tasks=kwargs['tasks'])
+    for i in range(calculate_makespanBnB(task_duration=kwargs['task_duration'])):
+        achievesDependencies = updateAchievedBnB(achievesDependencies, availability, i,
+                                                 task_duration=kwargs["task_duration"],
+                                                 task_dependencies=kwargs["task_dependencies"])
+        availability = modifyAvailabilityBnB(achievesDependencies, availability, i)
+        availability = checkResourcesBnB(availability, achievesDependencies, task_duration=kwargs['task_duration'],
+                                         task_resource=kwargs['task_resource'], resources=kwargs['resources'],
+                                         task_dependencies=kwargs["task_dependencies"], tasks=kwargs['tasks'])
 
 
 def result_makespan(availability_schedule, task_duration):
@@ -211,17 +212,17 @@ def result_makespan(availability_schedule, task_duration):
     Parameters:
     - availability_schedule: list of task start times.
     - task_duration: list of task durations.
-    Returns:
-    - makespan
     """
 
     highest_value = max(availability_schedule)
     pos = availability_schedule.index(highest_value)
     return highest_value + task_duration[pos]
 
-"-----------------------------------------------------------------------------------------------------------------------------------"
-"-----------------------------------------------------------------------------------------------------------------------------------"
 
+"-----------------------------------------------------------------------------------------------------------------------------------"
+"-----------------------------------------------------------------------------------------------------------------------------------"
+"TRANSLATED"
+"NON-TRANSLATED"
 def exercise2(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     disponibilidad = [-1] * tasks
     cumpleDependencia = [True] * tasks

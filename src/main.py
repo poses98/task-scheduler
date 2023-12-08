@@ -1,4 +1,5 @@
 # 1. IMPORTS
+import time
 "FOR TESTING:"
 from src.checks.testing_checkings import testDependenciesUnFullfilled
 from src.checks.testing_checkings import testDependenciesFullfilled
@@ -36,6 +37,7 @@ from src.upmproblems.rcpsp30 import get_task_dependencies as get_task_dependenci
 from src.upmevo.evo_exercises import exercise3 as simpleGenetic
 from src.upmevo.evo_exercises import exercise4 as advancedGenetic
 "FOR SEARCH:"
+from src.upmsearch.search_exercises import result_makespan
 from src.upmsearch.search_exercises import exercise1 as branchAndBound
 from src.upmsearch.search_exercises import exercise2 as aStar
 
@@ -91,16 +93,30 @@ def taskScheduler():
             # Then, the algorithm starts (depending on the previous choice made), with its data already prepared
             match choiceAlg:
                 case 1:
-                    branchAndBound(tasks, resources, task_duration, task_resource, task_dependencies)
+                    start_time = time.time()
+                    result = branchAndBound(tasks, resources, task_duration, task_resource, task_dependencies)
+                    makespan = result_makespan(result, task_duration)
+                    print(f"Makespan: {makespan}")
+                    end_time = time.time()
+                    print(result)
+                    elapsed_time = end_time - start_time
+                    print(f"Execution time: {elapsed_time:.30f} seconds")
                 case 2:
-                    aStar(tasks, resources, task_duration, task_resource, task_dependencies)
+                    start_time = time.time()
+                    result = aStar(tasks, resources, task_duration, task_resource, task_dependencies)
+                    makespan = result_makespan(result, task_duration)
+                    print(f"Makespan: {makespan}")
+                    end_time = time.time()
+                    print(result)
+                    elapsed_time = end_time - start_time
+                    print(f"Execution time: {elapsed_time:.30f} seconds")
                 case 3:
                     seed = 1
                     simpleGenetic(seed, tasks, resources, task_duration, task_resource, task_dependencies)
                 case 4:
                     seed = 0  # HERE, CORREGIR !!
                     advancedGenetic(seed, tasks, resources, task_duration, task_resource, task_dependencies)
-    print("Execution completed. Thank you")
+            print("Execution completed. Thank you")
 
 print("\Checking checks")
 checkingAlg()
