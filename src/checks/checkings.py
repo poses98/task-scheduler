@@ -1,4 +1,5 @@
 def checkDependencies(chromosome, task_duration, task_dependencies):
+
    """
    Returns true if all dependencies are fulfilled, false otherwise.
    Parameters:
@@ -37,6 +38,7 @@ def checkResources(chromosome, task_duration, task_resource, resources):
     :return:
     """
     fulfilled = True
+
     for each_instant in range(calculate_lastestEnd(chromosome, task_duration)):
         used_resources = 0
         for span_task in range(len(chromosome)):
