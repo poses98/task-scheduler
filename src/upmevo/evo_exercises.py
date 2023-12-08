@@ -312,10 +312,10 @@ def scheduling_fitness(schedule, *args, **kwargs):
     task_dependencies = kwargs['task_dependencies']
     max_duration = sum(task_duration)
     # Check for valid schedule based on dependencies
-    if not checks.checkings.checkDependencies(schedule, task_duration, task_dependencies):
+    if not checks.checkDependencies(schedule, task_duration, task_dependencies):
         return max_duration * 2 * task_number
     # Check for valid schedule based on resource constraints
-    if not checks.checkings.checkResources(chromosome=schedule, task_duration=task_duration,
+    if not checks.checkResources(chromosome=schedule, task_duration=task_duration,
                                            task_resource=task_resources, resources=max_resources):
         return max_duration * 3 * task_number
     # Calculate makespan as the fitness value
