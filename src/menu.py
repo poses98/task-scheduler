@@ -1,15 +1,16 @@
 def menuAlgorithm():
     choice = -1
-    while choice < 0 or choice > 4:
+    while choice < 0 or choice > 5:
         print("\nMenu algorithms:")
         print("1. Branch and Bound")
         print("2. A*")
         print("3. Simple Genetic Algorithm")
         print("4. Advanced Genetic Algorithm")
+        print("5. (>30) Advanced Genetic Algorithm")
         print("0. Exit")
         choice = int(input("Enter your choice: "))
-        if choice < 0 or choice > 4:
-            print("***Please enter a valid option 0-4.***")
+        if choice < 0 or choice > 6:
+            print("***Please enter a valid option 0-5.***")
     return choice
 
 def menuProblems():

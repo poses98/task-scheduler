@@ -93,32 +93,6 @@ def one_point_crossover(parent1, parent2, p_cross, *args, **kwargs):
         return parent1, parent2
 
 
-def pmx_crossover(parent1, parent2, p_cross, *args, **kwargs):
-    if np.random.random() < p_cross:
-        size = len(parent1)
-        point1 = np.random.randint(0, size - 1)
-        point2 = np.random.randint(point1 + 1, size)
-
-        # Initialize the children as copies of the parents
-        child1 = parent1.copy()
-        child2 = parent2.copy()
-
-        # Perform PMX crossover
-        for i in range(point1, point2):
-            # Swap the values between the two parents
-            temp1, temp2 = child1[i], child2[i]
-            child1[i], child2[i] = temp2, temp1
-
-            # Update the mapping for the swapped values
-            index1 = np.where(child1 == temp2)[0][0]
-            index2 = np.where(child2 == temp1)[0][0]
-            child1[index1], child2[index2] = temp1, temp2
-
-        return child1, child2
-    else:
-        return parent1.copy(), parent2.copy()
-
-
 def uniform_mutation(chromosome, p_mut, alphabet, *args, **kwargs):
     child = np.copy(chromosome)
     random_values = np.random.random(len(chromosome))
@@ -223,7 +197,8 @@ def tournament_selection(population, fitness, number_parents, tournament_size=3,
     return selected_parents
 
 
-def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
+def exercise4(seed=1234567890, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[], *args,
+              **kwargs):
     """
     Returns the best solution found by the advanced genetic algorithm of exercise 4
     :param seed: used to initialize the random number generator
@@ -234,20 +209,19 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
     :param task_dependencies: list of dependencies (expressed as binary tuples) between tasks
     :return: list with the start time of each task in the best solution found, or empty list if no solution was found
     """
-    print("Advanced Genetic Algorithm")
-    np.random.seed(1234567890)
+    np.random.seed(seed)
     # Parameter initialization
-    pop_size = 100
+    pop_size = 150
     elitism = 10
-    generations = 200
-    p_cross = 1.0
+    generations = 150
+    p_cross = 0.9
     p_mut = 0.15
 
     fittest_individual, fittest_fitness, generation, best_fitness, mean_fitness = adv_genetic_algorithm(
         alphabet=range(sum(task_duration)),
         length=tasks,
         pop_size=pop_size,
-        generate_individual=generate_random_individual,
+        generate_individual=generate_random_individual_w_zero,
         fitness=scheduling_fitness,
         stopping_criteria=generation_stop,
         elitism=elitism,
@@ -262,21 +236,24 @@ def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], 
         task_dependencies=task_dependencies,
         max_gen=generations)
 
-    # Display results
-    print("Best Individual:")
-    print(fittest_individual)
-    print("\nBest Individual's Fitness:" + str(fittest_fitness))
+    if kwargs['plot']:
+        # Display results
+        print("Best Individual:")
+        print(fittest_individual)
+        print("\nBest Individual's Fitness:" + str(fittest_fitness))
 
-    x = np.linspace(0, generations, generations + 1)
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
-    fig.tight_layout(pad=5.0)
-    ax1.plot(x, best_fitness)
-    ax2.plot(x, mean_fitness)
-    ax1.set_xlabel('Generation')
-    ax1.set_ylabel('Best Fitness')
-    ax2.set_xlabel('Generation')
-    ax2.set_ylabel('Mean Fitness')
-    plt.show()
+        x = np.linspace(0, generations, generations + 1)
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+        fig.tight_layout(pad=5.0)
+        ax1.plot(x, best_fitness)
+        ax2.plot(x, mean_fitness)
+        ax1.set_xlabel('Generation')
+        ax1.set_ylabel('Best Fitness')
+        ax2.set_xlabel('Generation')
+        ax2.set_ylabel('Mean Fitness')
+        plt.show()
+
+    return fittest_fitness
 
 
 def adv_genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, stopping_criteria, elitism,
@@ -340,19 +317,32 @@ def scheduling_fitness(schedule, *args, **kwargs):
     max_resources = kwargs['resources']  # Maximum number of resources available
     task_duration = kwargs['task_duration']
     task_resources = kwargs['task_resources']
+    task_number = len(task_duration)
     task_dependencies = kwargs['task_dependencies']
     max_duration = sum(task_duration)
     # Check for valid schedule based on dependencies
     if not checks.checkings.checkDependencies(schedule, task_duration, task_dependencies):
-        return max_duration * 3
+        return max_duration * 2 * task_number
     # Check for valid schedule based on resource constraints
     if not checks.checkings.checkResources(chromosome=schedule, task_duration=task_duration,
-                                           task_resource =task_resources, resources=max_resources):
-        return max_duration * 4
+                                           task_resource=task_resources, resources=max_resources):
+        return max_duration * 3 * task_number
     # Calculate makespan as the fitness value
 
     makespan = calculate_makespan_adv(schedule, task_duration)
     return makespan
+
+
+def generate_random_individual_w_zero(alphabet, length, *args, **kwargs):
+    indices = np.random.randint(0, len(alphabet), length)
+    individual = np.array(alphabet)[indices]
+
+    # Heuristic: Ensure at least one individual is 0
+    if 0 not in individual:
+        zero_index = np.random.randint(0, length)
+        individual[zero_index] = 0
+
+    return individual
 
 
 def calculate_makespan_adv(chromosome, tasks_duration):
