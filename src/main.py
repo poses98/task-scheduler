@@ -102,6 +102,7 @@ def taskScheduler():
                     advancedGenetic(seed, tasks, resources, task_duration, task_resource, task_dependencies)
     print("Execution completed. Thank you")
 
-print('\nTask Scheduler')
+print("\Checking checks")
 checkingAlg()
+print('\nTask Scheduler')
 taskScheduler()
