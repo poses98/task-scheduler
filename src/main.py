@@ -115,7 +115,7 @@ def taskScheduler():
                     sys.stdout.write(f"Progress: {0}/{n_ex-1}")
                     for i in range(n_ex):
                         seed = 1234567 + i * i ^ 2
-                        fittest_fitness = advancedGenetic(seed, tasks, resources, task_duration, task_resource, task_dependencies, plot=False)
+                        fittest_fitness, fittest_individual = advancedGenetic(seed, tasks, resources, task_duration, task_resource, task_dependencies, plot=False)
                         fitness_ex.append(fittest_fitness/10)
                         sys.stdout.flush()
                         sys.stdout.write("\r")

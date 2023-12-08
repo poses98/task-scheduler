@@ -253,7 +253,7 @@ def exercise4(seed=1234567890, tasks=0, resources=0, task_duration=[], task_reso
         ax2.set_ylabel('Mean Fitness')
         plt.show()
 
-    return fittest_fitness
+    return fittest_fitness, fittest_individual
 
 
 def adv_genetic_algorithm(alphabet, length, pop_size, generate_individual, fitness, stopping_criteria, elitism,
