@@ -1,7 +1,6 @@
 from src.checks.checkings import checkResources
 from src.checks.checkings import checkDependencies
-import heapq
-import checks
+
 
 
 def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
@@ -52,104 +51,144 @@ def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dep
 
     # A* Search Algorithm for task scheduling with resources
 
-def exercise2(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
+def exercise2(tasks, resources, task_duration, task_resource, task_dependencies):
+    disponibilidad = [-1] * tasks
+    cumpleDependencia = [True] * tasks
+    a_star(disponibilidad, cumpleDependencia, tasks=tasks, resources=resources, task_duration=task_duration,
+           task_resource=task_resource, task_dependencies=task_dependencies)
+    return disponibilidad
 
-        # Define the heuristic function
-        def heuristic(state):
-            return heuristic_function(state['position'], chromosome=state['chromosome'],
-                                      tasks_dependencies=task_dependencies, task_duration=task_duration,
-                                      task_resource=task_resource)
+def calculate_makespan(task_duration, *args, **kwargs):
+    end_time = -1
+    for actual_task in range(len(task_duration)):
+        end_time += task_duration[actual_task]
+    return end_time
 
-        # Define the successors function using the selectDecision function
-        def successors(state):
-            successors = []
-            selected_task = selectDecision(state['chromosome'])
-            if selected_task != -1:
-                new_state = state.copy()
-                new_state['chromosome'][selected_task] = state['time']  # Assign the current time to the selected task
-                new_state['time'] += task_duration[selected_task]  # Increment time by the task's duration
-                successors.append(new_state)
-            return successors
+def actualizarCumplido(cumpleDependencias, disponibilidad, i, task_duration, task_dependencies):
+    for task in range(len(cumpleDependencias)):
+        cumpleDependencias[task] = checkDependenciasAs(i, disponibilidad, task_duration, task_dependencies, task)
+    return cumpleDependencias
 
-        # Define the goal check function using the provided checks module
-        def is_goal_state(state):
-            return checks.checkDependencies(chromosome=state['chromosome'], task_dependencies=task_dependencies,
-                                            task_duration=task_duration) and checks.checkResources(
+def checkDependenciasAs(i, disponibilidad, task_duration, task_dependencies, task):
+    cumple = True
+    for dependency in task_dependencies:
+        (dependent_task, current_task) = dependency
+        if current_task == task + 1:
+            dependent_task_start_time = disponibilidad[dependent_task - 1]
+            if dependent_task_start_time == -1:
+                cumple = False
+            else:
+                if (dependent_task_start_time + task_duration[dependent_task-1]) > i:
+                    cumple = False
+    return cumple
 
-                chromosome=state['chromosome'], task_duration=task_duration, task_resource=task_resource)
+def checkResources(disponibilidad, cumpleDependencias, task_duration, task_resource, resources, **kwargs):
+    for instant in range(calculate_makespan(task_duration)):
+        used_resources = 0
+        for span_task in range(len(cumpleDependencias)):
+            if disponibilidad[span_task] != -1:
+                if (instant >= disponibilidad[span_task]) and (instant < (disponibilidad[span_task] + task_duration[span_task])):
+                    used_resources += task_resource[span_task]
+                if used_resources > resources:
+                    # If resources are exceeded, try to reschedule the task
+                    disponibilidad = mejorCoste(instant, disponibilidad, cumpleDependencias, task_duration, task_resource, resources, used_resources, **kwargs)
+    return disponibilidad
+def mejorCoste(instant, disponibilidad, cumpleDependencias, task_duration, task_resource, resources, used_resources, **kwargs):
+    peor_coste = 1000
+    pos = -1
+    while used_resources > resources:
+        for i in range(len(disponibilidad)):
+            if disponibilidad[i] != -1:
+                if (instant >= disponibilidad[i]) & (instant < (disponibilidad[i] + task_duration[i])):
+                    actual = calcularCoste(i, task_duration, task_resource, **kwargs)
+                    if actual < peor_coste:
+                        peor_coste = actual
+                        pos = i
+        disponibilidad[pos] = -1
+        used_resources -= task_resource[pos]
+    return disponibilidad
 
-        # Initialize the priority queue
-        frontier = []
-        # Initial state: (cost, {'time': 0, 'chromosome': [-1] * tasks})
-        initial_state = {'time': 0, 'chromosome': [-1] * tasks}
-        heapq.heappush(frontier, (heuristic(initial_state), initial_state))
+def tareasDependiente(i, task_dependencies):
+    contador = 0
+    for dependency in task_dependencies:
+        (dependent_task, current_task) = dependency
+        if dependent_task == i + 1:
+            contador += 1
+    return contador
 
-        while frontier:
-            current_cost, current_state = heapq.heappop(frontier)
-
-            # Check if current state is the goal state
-            if is_goal_state(current_state):
-                return current_state['chromosome']
-
-            # Expand the current state to its successors
-            for next_state in successors(current_state):
-                next_cost = current_cost + 1  # Assume a uniform cost of 1 for each step
-                heapq.heappush(frontier, (next_cost + heuristic(next_state), next_state))
-
-        # If no solution is found, return an empty list
-        return []
+def calcularCoste(i, task_duration, task_resource,**kwargs):
+     tasks = kwargs["tasks"]
+     return (task_resource[i] / task_duration[i]) + tareasDependiente(i, task_dependencies = kwargs["task_dependencies"])
 
 
-        def selectDecision(chromosome):
-            best_heuristic = 0
-            selected_task = -1
-        for i in range(len(chromosome)):
-            if chromosome[i] == -1:  # Task not assigned yet
-                actual_heuristic = heuristic_function(i, chromosome=chromosome)
-                if actual_heuristic > best_heuristic:
-                    best_heuristic = actual_heuristic
-                    selected_task = i
-            return selected_task
 
 
-        def heuristic_function(position, **kwargs):
-            heuristic = 0
-            if checks.checkDependencies(kwargs=['chromosome'], task_dependencies=kwargs['tasks_dependencies'],
-                                    task_duration=kwargs['task_duration']):
-                if checks.checkResources(kwargs=['chromosome'], task_duration=kwargs['task_duration'],
-                                     task_resource=kwargs['task_resource']):
-                    heuristic = heuristic_proposal1(kwargs=['chromosome'])
-            return heuristic
+def modificarDisponibilidad(cumpleDependencias, disponibilidad, mejor):
+    for i in range(len(cumpleDependencias)):
+        if disponibilidad[i] == -1 and cumpleDependencias[i]:
+            # Schedule the task at the earliest possible time
+            disponibilidad[i] = mejor
+    return disponibilidad
 
-        def heuristic_proposal1(**kwargs):
-            # Extract necessary variables
-            chromosome = kwargs['chromosome']
-            task_duration = kwargs['task_duration']
-            task_resource = kwargs['task_resource']
-            resources = kwargs['resources']
+def a_star(disponibilidad, cumpleDependencias, **kwargs):
+    open_set = [(optimal_heuristic(disponibilidad, kwargs['task_duration'], kwargs['task_resource'], kwargs['task_dependencies'], kwargs['resources']), disponibilidad, cumpleDependencias)]
 
-        max_duration = -1
-        # Calculate the remaining time considering both dependencies and resources
-        for current_task in range(len(chromosome)):
-            if chromosome[current_task] == -1:  # Task not assigned yet
-                # Calculate the remaining time for the task
-                remaining_time = task_duration[current_task]
-                for dependency_task, dependency in enumerate(kwargs['task_dependencies'][current_task]):
-                    if dependency == 1 and chromosome[dependency_task] == -1:
-                        # If there's an unsatisfied dependency, add its duration to the remaining time
-                        remaining_time += task_duration[dependency_task]
+    while open_set:
+        # Find the state with the lowest f-cost
+        current_state = min(open_set, key=lambda x: x[0])
+        open_set.remove(current_state)
+        current_f_cost, current_disponibilidad, current_cumpleDependencias = current_state
 
-                # Check available resources
-                required_resources = task_resource[current_task]
-                available_resources = resources - chromosome.count(current_task)
-                if required_resources > available_resources:
-                    # Adjust remaining time by considering resource constraints
-                    remaining_time += (required_resources - available_resources) * max(task_duration)
+        # Check if the goal has been reached
+        if all(current_cumpleDependencias):
+            return current_disponibilidad  # Goal reached
 
-                if remaining_time > max_duration:
-                    max_duration = remaining_time
+        for i in range(calculate_makespan(task_duration=kwargs['task_duration'])):
+            new_cumpleDependencias = actualizarCumplido(current_cumpleDependencias, current_disponibilidad, i,
+                                                         task_duration=kwargs["task_duration"],
+                                                         task_dependencies=kwargs["task_dependencies"])
+            new_disponibilidad = modificarDisponibilidad(new_cumpleDependencias, current_disponibilidad, i)
+            new_disponibilidad = checkResources(new_disponibilidad, new_cumpleDependencias, task_duration=kwargs['task_duration'], task_resource=kwargs['task_resource'], resources=kwargs['resources'], task_dependencies=kwargs["task_dependencies"], tasks=kwargs['tasks'])
 
-        return max_duration
+            # Skip this state if not all dependencies are met
+            if not all(new_cumpleDependencias):
+                continue
+
+            # Calculate the f-cost for the new state
+            h_cost = optimal_heuristic(new_disponibilidad, kwargs['task_duration'], kwargs['task_resource'], kwargs['task_dependencies'], kwargs['resources'])
+            f_cost = calculate_makespan(task_duration=kwargs['task_duration'], disponibilidad=new_disponibilidad) + h_cost
+
+            # Add the new state to the open set
+            open_set.append((f_cost, new_disponibilidad, new_cumpleDependencias))
+
+    return None  # If the open set is empty and the goal was not reached, return None
+
+
+
+# Heuristic function
+def optimal_heuristic(disponibilidad, task_duration, task_resource, task_dependencies, resources):
+    # Heuristic part 1: Earliest possible start time for unscheduled tasks
+    h1 = 0
+    for task, start_time in enumerate(disponibilidad):
+        if start_time == -1:
+            # Find the earliest time the task can start based on dependencies
+            earliest_start = 0
+            for dependent_task, current_task in task_dependencies:
+                if current_task == task + 1:
+                    dependent_end_time = disponibilidad[dependent_task - 1] + task_duration[dependent_task - 1]
+                    earliest_start = max(earliest_start, dependent_end_time)
+            h1 += earliest_start
+
+    # Heuristic part 2: Resource constraint penalty
+    h2 = 0
+    for task, start_time in enumerate(disponibilidad):
+        if start_time == -1:
+            # Estimate the additional time needed due to resource constraints
+            h2 += task_resource[task] / resources * task_duration[task]
+
+    # Combine the heuristics
+    heuristic_value = h1 + h2
+    return heuristic_value
 
 
 
