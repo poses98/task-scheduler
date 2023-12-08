@@ -1,4 +1,3 @@
-from upmproblems import rcpsp06 as p6
 import numpy as np
 from checks import checkings as checks
 import math
@@ -8,9 +7,6 @@ def maximum_time(task_duration):
     for i in range(len(task_duration)):
         max_time = max_time + task_duration[i]
     return max_time
-
-
-alphabet = list(range(maximum_time(p6.get_task_duration())))
 
 
 def individual_fitness(chromosome, *args, **kwargs):
@@ -137,6 +133,7 @@ def exercise3(seed, tasks=0, resources=0, task_duration=[], task_resource=[], ta
     :return: list with the start time of each task in the best solution found, or empty list if no solution was found
     """
     print("Test Simple gen Alg")
+    alphabet = list(range(maximum_time(task_duration)))
     pop_size = 100
     max_gen = 100
     p_cross = 0.9
@@ -150,7 +147,6 @@ def exercise3(seed, tasks=0, resources=0, task_duration=[], task_resource=[], ta
 
     return fittest_individual
 
-exercise3(1, tasks=p6.get_tasks(), resources=p6.get_resources(), task_duration= p6.get_task_duration(), task_resource=p6.get_task_resource(), task_dependencies=p6.get_task_dependencies())
 
 
 def exercise4(seed=0, tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
