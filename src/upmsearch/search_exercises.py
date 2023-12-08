@@ -1,4 +1,3 @@
-
 def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     """
     Main function for exercise 1.
@@ -18,8 +17,11 @@ def exercise1(tasks=0, resources=0, task_duration=[], task_resource=[], task_dep
                      task_resource=task_resource, task_dependencies=task_dependencies)
     return availability
 
+
 "-----------------------------------------------------------------------------------------------------------------------------------"
 "Additional methods for exercise 1"
+
+
 def calculate_makespanBnB(task_duration, *args, **kwargs):
     """
     Calculates the makespan of a schedule, used during execution.
@@ -33,6 +35,7 @@ def calculate_makespanBnB(task_duration, *args, **kwargs):
     for actual_task in range(len(task_duration)):
         end_time += task_duration[actual_task]
     return end_time
+
 
 def updateAchievedBnB(achievesDependencies, availability, i, task_duration, task_dependencies):
     """
@@ -99,7 +102,8 @@ def checkResourcesBnB(availability, achievesDependencies, task_duration, task_re
                         instant < (availability[span_task] + task_duration[span_task])):
                     used_resources += task_resource[span_task]
                 if used_resources > resources:
-                    availability = bestCostBnB(instant, availability, achievesDependencies, task_duration, task_resource,
+                    availability = bestCostBnB(instant, availability, task_duration,
+                                               task_resource,
                                                resources, used_resources, **kwargs)
     return availability
 
@@ -152,6 +156,7 @@ def dependentTasksBnB(i, task_dependencies):
             if dependent_task == i + 1:
                 counter += 1
     return counter
+
 
 def calculateCostBnB(i, task_duration, task_resource, **kwargs):
     """
@@ -225,44 +230,49 @@ def calculate_makespan(task_duration, *args, **kwargs):
         end_time += task_duration[actual_task]
     return end_time
 
-def checkDependenciesAs(i, avaliability, task_duration, task_dependencies, task):
-    cumple = True
-    for dependency in task_dependencies:
-        (dependent_task, current_task) = dependency
-        if current_task == task + 1:
-            dependent_task_start_time = avaliability[dependent_task - 1]
-            if dependent_task_start_time == -1:
-                cumple = False
-            else:
-                if (dependent_task_start_time + task_duration[dependent_task-1]) > i:
-                    cumple = False
-    return cumple
 
-def checkResources(avaliability, fulfillsDependencies, task_duration, task_resource, resources, **kwargs):
+def checkDependenciesAs(current_fulfillsDependencies, current_availability, index, **kwargs):
+    dependency = kwargs['task_dependencies']
+    task_duration = kwargs['task_duration']
+    new_fulfillsDependencies = list(current_fulfillsDependencies)
+    for dependent_task, current_task in dependency:
+        if current_task == index + 1:
+            dependent_end_time = current_availability[dependent_task - 1] + task_duration[dependent_task - 1]
+            if dependent_end_time > current_availability[index]:
+                new_fulfillsDependencies[index] = False
+
+    return new_fulfillsDependencies
+
+def checkResourcesAs(avaliability, fulfillsDependencies, task_duration, task_resource, resources, **kwargs):
     for instant in range(calculate_makespan(task_duration)):
         used_resources = 0
         for span_task in range(len(fulfillsDependencies)):
             if avaliability[span_task] != -1:
-                if (instant >= avaliability[span_task]) and (instant < (avaliability[span_task] + task_duration[span_task])):
+                if (instant >= avaliability[span_task]) and (
+                        instant < (avaliability[span_task] + task_duration[span_task])):
                     used_resources += task_resource[span_task]
                 if used_resources > resources:
                     # If resources are exceeded, try to reschedule the task
-                    avaliability = bestCost(instant, avaliability, fulfillsDependencies, task_duration, task_resource, resources, used_resources, **kwargs)
+                    avaliability = bestCost(instant, avaliability, task_duration, task_resource,
+                                            resources, used_resources, **kwargs)
     return avaliability
-def bestCost(instant, disponibilidad, task_duration, task_resource, resources, used_resources, **kwargs):
+
+
+def bestCost(instant, avaliability, task_duration, task_resource, resources, used_resources, **kwargs):
     peor_coste = 1000
     pos = -1
     while used_resources > resources:
-        for i in range(len(disponibilidad)):
-            if disponibilidad[i] != -1:
-                if (instant >= disponibilidad[i]) & (instant < (disponibilidad[i] + task_duration[i])):
+        for i in range(len(avaliability)):
+            if avaliability[i] != -1:
+                if (instant >= avaliability[i]) & (instant < (avaliability[i] + task_duration[i])):
                     actual = calculateCost(i, task_duration, task_resource, **kwargs)
                     if actual < peor_coste:
                         peor_coste = actual
                         pos = i
-        disponibilidad[pos] = -1
+        avaliability[pos] = -1
         used_resources -= task_resource[pos]
-    return disponibilidad
+    return avaliability
+
 
 def dependent_tasks(i, task_dependencies):
     contador = 0
@@ -272,11 +282,9 @@ def dependent_tasks(i, task_dependencies):
             contador += 1
     return contador
 
+
 def calculateCost(i, task_duration, task_resource, **kwargs):
-     tasks = kwargs["tasks"]
-     return (task_resource[i] / task_duration[i]) + dependent_tasks(i, task_dependencies = kwargs["task_dependencies"])
-
-
+    return (task_resource[i] / task_duration[i]) + dependent_tasks(i, task_dependencies=kwargs["task_dependencies"])
 
 
 def updateAvaliability(fulfillsDependencies, avaliability, mejor):
@@ -288,22 +296,22 @@ def updateAvaliability(fulfillsDependencies, avaliability, mejor):
 
 
 # Heuristic function
-def optimal_heuristic(disponibilidad, task_duration, task_resource, task_dependencies, resources):
+def optimal_heuristic(avaliability, task_duration, task_resource, task_dependencies, resources):
     # Heuristic part 1: Earliest possible start time for unscheduled tasks
     h1 = 0
-    for task, start_time in enumerate(disponibilidad):
+    for task, start_time in enumerate(avaliability):
         if start_time == -1:
             # Find the earliest time the task can start based on dependencies
             earliest_start = 0
             for dependent_task, current_task in task_dependencies:
                 if current_task == task + 1:
-                    dependent_end_time = disponibilidad[dependent_task - 1] + task_duration[dependent_task - 1]
+                    dependent_end_time = avaliability[dependent_task - 1] + task_duration[dependent_task - 1]
                     earliest_start = max(earliest_start, dependent_end_time)
             h1 += earliest_start
 
     # Heuristic part 2: Resource constraint penalty
     h2 = 0
-    for task, start_time in enumerate(disponibilidad):
+    for task, start_time in enumerate(avaliability):
         if start_time == -1:
             # Estimate the additional time needed due to resource constraints
             h2 += task_resource[task] / resources * task_duration[task]
@@ -312,9 +320,12 @@ def optimal_heuristic(disponibilidad, task_duration, task_resource, task_depende
     heuristic_value = h1 + h2
     return heuristic_value
 
-def a_star(disponibilidad, cumpleDependencias, **kwargs):
-    open_set = [(optimal_heuristic(disponibilidad, kwargs['task_duration'], kwargs['task_resource'], kwargs['task_dependencies'], kwargs['resources']), disponibilidad, cumpleDependencias)]
 
+def a_star(best_solution, fulfillsDependencies, **kwargs):
+    open_set = [(optimal_heuristic(best_solution, kwargs['task_duration'], kwargs['task_resource'],
+                                   kwargs['task_dependencies'], kwargs['resources']), best_solution,
+                 fulfillsDependencies)]
+    best_solution = None
     while open_set:
         # Find the state with the lowest f-cost
         current_state = min(open_set, key=lambda x: x[0])
@@ -323,37 +334,39 @@ def a_star(disponibilidad, cumpleDependencias, **kwargs):
 
         # Check if the goal has been reached
         if all(current_fulfillsDependencies):
-            return current_avaliability  # Goal reached
+            if best_solution is None or current_f_cost < best_solution[0]:
+                best_solution = current_avaliability
 
         for i in range(calculate_makespan(task_duration=kwargs['task_duration'])):
-            new_cumpleDependencias = actualizarCumplido(current_fulfillsDependencies, current_avaliability, i,
-                                                         task_duration=kwargs["task_duration"],
-                                                         task_dependencies=kwargs["task_dependencies"])
-            new_disponibilidad = updateAvaliability(new_cumpleDependencias, current_avaliability, i)
-            new_disponibilidad = checkResources(new_disponibilidad, new_cumpleDependencias, task_duration=kwargs['task_duration'], task_resource=kwargs['task_resource'], resources=kwargs['resources'], task_dependencies=kwargs["task_dependencies"], tasks=kwargs['tasks'])
+            new_fulfillsDependencies = checkDependenciesAs(current_fulfillsDependencies, current_avaliability, i,
+                                                        task_duration=kwargs["task_duration"],
+                                                        task_dependencies=kwargs["task_dependencies"])
+            new_disponibilidad = updateAvaliability(new_fulfillsDependencies, current_avaliability, i)
+            new_disponibilidad = checkResourcesAs(new_disponibilidad, new_fulfillsDependencies,
+                                                  task_duration=kwargs['task_duration'],
+                                                  task_resource=kwargs['task_resource'], resources=kwargs['resources'],
+                                                  task_dependencies=kwargs["task_dependencies"], tasks=kwargs['tasks'])
 
             # Skip this state if not all dependencies are met
-            if not all(new_cumpleDependencias):
+            if not all(new_fulfillsDependencies):
                 continue
 
             # Calculate the f-cost for the new state
-            h_cost = optimal_heuristic(new_disponibilidad, kwargs['task_duration'], kwargs['task_resource'], kwargs['task_dependencies'], kwargs['resources'])
-            f_cost = calculate_makespan(task_duration=kwargs['task_duration'], disponibilidad=new_disponibilidad) + h_cost
+            h_cost = optimal_heuristic(new_disponibilidad, kwargs['task_duration'], kwargs['task_resource'],
+                                       kwargs['task_dependencies'], kwargs['resources'])
+            f_cost = calculate_makespan(task_duration=kwargs['task_duration'],
+                                        disponibilidad=new_disponibilidad) + h_cost
 
             # Add the new state to the open set
-            open_set.append((f_cost, new_disponibilidad, new_cumpleDependencias))
+            open_set.append((f_cost, new_disponibilidad, new_fulfillsDependencies))
 
-    return new_disponibilidad  # If the open set is empty and the goal was not reached, return None
-
-
-
+    return best_solution  # If the open set is empty and the goal was not reached, return None
 
 
 def exercise2(tasks, resources, task_duration=[], task_resource=[], task_dependencies=[]):
-    disponibilidad = [-1] * tasks
-    cumpleDependencia = [True] * tasks
-    disponibilidad = a_star(disponibilidad, cumpleDependencia, tasks=tasks, resources=resources, task_duration=task_duration,
-           task_resource=task_resource, task_dependencies=task_dependencies)
-    return disponibilidad
-
-
+    fulfillsDependencies = [True] * tasks
+    best_solution = [-1] * tasks
+    best_solution = a_star(best_solution, fulfillsDependencies, tasks=tasks, resources=resources,
+                          task_duration=task_duration,
+                          task_resource=task_resource, task_dependencies=task_dependencies)
+    return best_solution
