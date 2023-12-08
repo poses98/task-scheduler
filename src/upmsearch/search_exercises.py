@@ -222,7 +222,7 @@ def result_makespan(availability_schedule, task_duration):
 "-----------------------------------------------------------------------------------------------------------------------------------"
 "-----------------------------------------------------------------------------------------------------------------------------------"
 
-def exercise2(tasks, resources, task_duration, task_resource, task_dependencies):
+def exercise2(tasks=0, resources=0, task_duration=[], task_resource=[], task_dependencies=[]):
     disponibilidad = [-1] * tasks
     cumpleDependencia = [True] * tasks
     a_star(disponibilidad, cumpleDependencia, tasks=tasks, resources=resources, task_duration=task_duration,
