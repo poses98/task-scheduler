@@ -1,4 +1,5 @@
 # 1. IMPORTS
+import time
 "FOR TESTING:"
 from src.checks.testing_checkings import testDependenciesUnFullfilled
 from src.checks.testing_checkings import testDependenciesFullfilled
@@ -42,6 +43,7 @@ import sys
 from statistics import mean, stdev
 
 "FOR SEARCH:"
+from src.upmsearch.search_exercises import result_makespan
 from src.upmsearch.search_exercises import exercise1 as branchAndBound
 from src.upmsearch.search_exercises import exercise2 as aStar
 
@@ -100,14 +102,28 @@ def taskScheduler():
             # Then, the algorithm starts (depending on the previous choice made), with its data already prepared
             match choiceAlg:
                 case 1:
-                    branchAndBound(tasks, resources, task_duration, task_resource, task_dependencies)
+                    start_time = time.time()
+                    result = branchAndBound(tasks, resources, task_duration, task_resource, task_dependencies)
+                    makespan = result_makespan(result, task_duration)
+                    print(f"Makespan: {makespan}")
+                    end_time = time.time()
+                    print(result)
+                    elapsed_time = end_time - start_time
+                    print(f"Execution time: {elapsed_time:.30f} seconds")
                 case 2:
-                    aStar(tasks, resources, task_duration, task_resource, task_dependencies)
+                    start_time = time.time()
+                    result = aStar(tasks, resources, task_duration, task_resource, task_dependencies)
+                    makespan = result_makespan(result, task_duration)
+                    print(f"Makespan: {makespan}")
+                    end_time = time.time()
+                    print(result)
+                    elapsed_time = end_time - start_time
+                    print(f"Execution time: {elapsed_time:.30f} seconds")
                 case 3:
-                    seed = 0  # HERE, CORREGIR !!
+                    seed = 1
                     simpleGenetic(seed, tasks, resources, task_duration, task_resource, task_dependencies)
                 case 4:
-                    seed = 0  # HERE, CORREGIR !!
+                    seed = 0
                     advancedGenetic(seed, tasks, resources, task_duration, task_resource, task_dependencies, plot=True)
                 case 5:
                     n_ex = 31
@@ -124,7 +140,10 @@ def taskScheduler():
 
     print("Execution completed. Thank you")
 
-
-print('\nTask Scheduler')
+print("\Checking checks")
 checkingAlg()
+print('\nTask Scheduler')
 taskScheduler()
+
+
+
